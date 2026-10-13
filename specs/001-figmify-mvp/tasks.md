@@ -50,7 +50,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-02, RF-05.  
   **Hecho cuando:** una segunda solicitud durante procesamiento se rechaza y una respuesta tardía de una sesión inactiva no cambia el estado.
 
-- [ ] **13. Preparar el harness de integración contra la API local real.**  
+- [x] **13. Preparar el harness de integración contra la API local real.**  
   **RF:** RF-01, RF-05, RF-06.  
   **Hecho cuando:** los tests de integración pueden iniciar contra `127.0.0.1:3000` y fallan claramente si la API local no está disponible.
 
