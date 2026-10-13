@@ -14,11 +14,11 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01 a RF-06.  
   **Hecho cuando:** existe un comando de tests que ejecuta una prueba vacía correctamente.
 
-- [ ] **04. Configurar el acceso de red del manifiesto para el MVP.**  
+- [x] **04. Configurar el acceso de red del manifiesto para el MVP.**  
   **RF:** RF-03, RF-06.  
   **Hecho cuando:** el manifiesto contiene `allowedDomains: ["*"]`, la justificación aprobada en inglés y `http://127.0.0.1:3000` como dominio de desarrollo.
 
-- [ ] **05. Crear la estructura de módulos y las entradas de composición sin implementar comportamiento.**  
+- [x] **05. Crear la estructura de módulos y las entradas de composición sin implementar comportamiento.**
   **RF:** RF-01 a RF-06.  
   **Hecho cuando:** las rutas de módulos previstas en `plan.md` compilan y las capas de dominio, aplicación, infraestructura e interfaz no se importan en dirección prohibida.
 
