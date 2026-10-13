@@ -22,11 +22,11 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01 a RF-06.  
   **Hecho cuando:** las rutas de módulos previstas en `plan.md` compilan y las capas de dominio, aplicación, infraestructura e interfaz no se importan en dirección prohibida.
 
-- [ ] **06. Definir los tipos de éxito y error de API v1.**  
+- [x] **06. Definir los tipos de éxito y error de API v1.**  
   **RF:** RF-01, RF-03, RF-05, RF-06.  
   **Hecho cuando:** `FigmaDocument`, los nodos v1 y `{code, message}` están tipados sin usar tipos implícitos.
 
-- [ ] **07. Implementar y probar la validación de cabecera de API v1.**  
+- [x] **07. Implementar y probar la validación de cabecera de API v1.**  
   **RF:** RF-03, RF-05.  
   **Hecho cuando:** las pruebas aceptan `schemaVersion: "1.0"` y rechazan versión, origen o documento raíz ausentes.
 
