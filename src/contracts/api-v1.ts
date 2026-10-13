@@ -213,6 +213,104 @@ function isFigmaNodeType(value: unknown): value is FigmaNodeType {
   return value === 'FRAME' || value === 'TEXT' || value === 'IMAGE'
 }
 
+function isRgbaColor(value: unknown): value is FigmaRgbaColor {
+  return (
+    isRecord(value) &&
+    isFiniteNumber(value.r) &&
+    isFiniteNumber(value.g) &&
+    isFiniteNumber(value.b) &&
+    isFiniteNumber(value.a)
+  )
+}
+
+function isSolidPaint(value: unknown): value is FigmaSolidPaint {
+  return isRecord(value) && value.type === 'SOLID' && isRgbaColor(value.color)
+}
+
+function isPaint(value: unknown): value is FigmaPaint {
+  return (
+    isSolidPaint(value) ||
+    (isRecord(value) && value.type === 'IMAGE' && typeof value.src === 'string' && value.scaleMode === 'FILL')
+  )
+}
+
+function isStroke(value: unknown): value is FigmaStroke {
+  return (
+    isSolidPaint(value) &&
+    isFiniteNumber(value.weight) &&
+    (value.side === undefined || value.side === 'TOP' || value.side === 'RIGHT' || value.side === 'BOTTOM' || value.side === 'LEFT')
+  )
+}
+
+function isEffect(value: unknown): value is FigmaEffect {
+  return (
+    isRecord(value) &&
+    (value.type === 'DROP_SHADOW' || value.type === 'INNER_SHADOW') &&
+    isRgbaColor(value.color) &&
+    isRecord(value.offset) &&
+    isFiniteNumber(value.offset.x) &&
+    isFiniteNumber(value.offset.y) &&
+    isFiniteNumber(value.radius) &&
+    isFiniteNumber(value.spread)
+  )
+}
+
+function isTextStyle(value: unknown): value is FigmaTextStyle {
+  return (
+    isRecord(value) &&
+    typeof value.fontFamily === 'string' &&
+    isFiniteNumber(value.fontSize) &&
+    isFiniteNumber(value.fontWeight) &&
+    isFiniteNumber(value.lineHeight) &&
+    isFiniteNumber(value.letterSpacing) &&
+    (value.textAlign === 'LEFT' || value.textAlign === 'CENTER' || value.textAlign === 'RIGHT' || value.textAlign === 'JUSTIFIED') &&
+    (value.textAutoResize === 'NONE' || value.textAutoResize === 'WIDTH_AND_HEIGHT' || value.textAutoResize === 'HEIGHT' || value.textAutoResize === 'TRUNCATE')
+  )
+}
+
+function isImageData(value: unknown): value is FigmaImageData {
+  if (!isRecord(value) || typeof value.src !== 'string') {
+    return false
+  }
+
+  return (
+    (isFiniteNumber(value.naturalWidth) && isFiniteNumber(value.naturalHeight) && typeof value.objectFit === 'string') ||
+    typeof value.backgroundSize === 'string'
+  )
+}
+
+function isStyleCatalog(value: unknown): value is FigmaStyleCatalog {
+  if (!isRecord(value) || !Array.isArray(value.colors) || !Array.isArray(value.typographies)) {
+    return false
+  }
+
+  return (
+    value.colors.every((color) => isRecord(color) && typeof color.id === 'string' && color.id.startsWith('color-') && typeof color.name === 'string' && isRgbaColor(color.rgba)) &&
+    value.typographies.every((typography) =>
+      isRecord(typography) &&
+      typeof typography.id === 'string' &&
+      typography.id.startsWith('type-') &&
+      typeof typography.fontFamily === 'string' &&
+      typeof typography.fontSize === 'string' &&
+      typeof typography.fontWeight === 'string' &&
+      typeof typography.fontStyle === 'string' &&
+      typeof typography.lineHeight === 'string' &&
+      typeof typography.letterSpacing === 'string' &&
+      typeof typography.textTransform === 'string',
+    )
+  )
+}
+
+function isFontAsset(value: unknown): value is FigmaFontAsset {
+  return (
+    isRecord(value) &&
+    typeof value.family === 'string' &&
+    Array.isArray(value.weights) &&
+    value.weights.every(isFiniteNumber) &&
+    (value.url === undefined || typeof value.url === 'string')
+  )
+}
+
 export function hasValidFigmaRect(value: unknown): value is FigmaRect {
   if (!isRecord(value)) {
     return false
@@ -245,6 +343,17 @@ export function hasValidApiV1Node(value: unknown): value is FigmaNode {
     return false
   }
 
+  if (
+    (value.fills !== undefined && (!Array.isArray(value.fills) || !value.fills.every(isPaint))) ||
+    (value.strokes !== undefined && value.strokes !== null && (!Array.isArray(value.strokes) || !value.strokes.every(isStroke))) ||
+    (value.effects !== undefined && value.effects !== null && (!Array.isArray(value.effects) || !value.effects.every(isEffect))) ||
+    (value.styles !== undefined && !isTextStyle(value.styles)) ||
+    (value.image !== undefined && !isImageData(value.image)) ||
+    (value.svg !== undefined && typeof value.svg !== 'string')
+  ) {
+    return false
+  }
+
   return value.children.every(hasValidApiV1Node)
 }
 
@@ -257,5 +366,23 @@ export function hasValidApiV1Header(value: unknown): boolean {
     value.schemaVersion === '1.0' &&
     isRecord(value.source) &&
     isRecord(value.document)
+  )
+}
+
+export function hasValidApiV1Document(value: unknown): value is FigmaDocument {
+  if (!hasValidApiV1Header(value) || !isRecord(value) || !isRecord(value.source)) {
+    return false
+  }
+
+  return (
+    typeof value.source.url === 'string' &&
+    isRecord(value.source.viewport) &&
+    isFiniteNumber(value.source.viewport.width) &&
+    isFiniteNumber(value.source.viewport.height) &&
+    (value.source.viewport.deviceScaleFactor === 1 || value.source.viewport.deviceScaleFactor === 2 || value.source.viewport.deviceScaleFactor === 3) &&
+    isStyleCatalog(value.styles) &&
+    Array.isArray(value.assets) &&
+    value.assets.every(isFontAsset) &&
+    hasValidApiV1Node(value.document)
   )
 }

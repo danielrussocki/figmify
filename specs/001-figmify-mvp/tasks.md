@@ -34,7 +34,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03, RF-05.  
   **Hecho cuando:** las pruebas rechazan nodos sin tipo, geometría, visibilidad o lista válida de hijos.
 
-- [ ] **09. Implementar y probar la validación de estilos, pinturas, recursos y catálogos v1.**  
+- [x] **09. Implementar y probar la validación de estilos, pinturas, recursos y catálogos v1.**
   **RF:** RF-03, RF-05.  
   **Hecho cuando:** las fixtures válidas se aceptan y las pinturas, recursos o catálogos malformados se rechazan antes de cualquier mutación de Figma.
 
