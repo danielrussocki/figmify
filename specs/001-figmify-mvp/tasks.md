@@ -38,7 +38,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03, RF-05.  
   **Hecho cuando:** las fixtures válidas se aceptan y las pinturas, recursos o catálogos malformados se rechazan antes de cualquier mutación de Figma.
 
-- [ ] **10. Definir los mensajes tipados y el `requestId` del protocolo de interfaz.**  
+- [x] **10. Definir los mensajes tipados y el `requestId` del protocolo de interfaz.**  
   **RF:** RF-01, RF-02, RF-03, RF-04, RF-05.  
   **Hecho cuando:** `IMPORT_REQUEST`, confirmación, selección de fuente, cancelación, cierre y estado están representados por uniones tipadas con `requestId`.
 
