@@ -205,6 +205,49 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value)
+}
+
+function isFigmaNodeType(value: unknown): value is FigmaNodeType {
+  return value === 'FRAME' || value === 'TEXT' || value === 'IMAGE'
+}
+
+export function hasValidFigmaRect(value: unknown): value is FigmaRect {
+  if (!isRecord(value)) {
+    return false
+  }
+
+  return (
+    isFiniteNumber(value.x) &&
+    isFiniteNumber(value.y) &&
+    isFiniteNumber(value.width) &&
+    isFiniteNumber(value.height) &&
+    isFiniteNumber(value.top) &&
+    isFiniteNumber(value.left)
+  )
+}
+
+export function hasValidApiV1Node(value: unknown): value is FigmaNode {
+  if (!isRecord(value)) {
+    return false
+  }
+
+  if (
+    typeof value.id !== 'string' ||
+    typeof value.tag !== 'string' ||
+    !isFigmaNodeType(value.type) ||
+    !hasValidFigmaRect(value.rect) ||
+    (value.relativeRect !== undefined && !hasValidFigmaRect(value.relativeRect)) ||
+    typeof value.isVisible !== 'boolean' ||
+    !Array.isArray(value.children)
+  ) {
+    return false
+  }
+
+  return value.children.every(hasValidApiV1Node)
+}
+
 export function hasValidApiV1Header(value: unknown): boolean {
   if (!isRecord(value)) {
     return false

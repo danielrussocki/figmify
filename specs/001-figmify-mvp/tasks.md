@@ -30,7 +30,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03, RF-05.  
   **Hecho cuando:** las pruebas aceptan `schemaVersion: "1.0"` y rechazan versión, origen o documento raíz ausentes.
 
-- [ ] **08. Implementar y probar la validación recursiva de nodos y rectángulos v1.**  
+- [x] **08. Implementar y probar la validación recursiva de nodos y rectángulos v1.**
   **RF:** RF-03, RF-05.  
   **Hecho cuando:** las pruebas rechazan nodos sin tipo, geometría, visibilidad o lista válida de hijos.
 
