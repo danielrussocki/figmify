@@ -54,7 +54,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01, RF-05, RF-06.  
   **Hecho cuando:** los tests de integración pueden iniciar contra `127.0.0.1:3000` y fallan claramente si la API local no está disponible.
 
-- [ ] **14. Escribir la prueba de integración HTTP de solicitud correcta.**  
+- [x] **14. Escribir la prueba de integración HTTP de solicitud correcta.**  
   **RF:** RF-01, RF-06.  
   **Hecho cuando:** la prueba real verifica `GET /v1/figma`, la URL transmitida como parámetro, `includeHidden=false` y la ausencia de autenticación.
 
