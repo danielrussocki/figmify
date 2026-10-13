@@ -46,7 +46,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-02, RF-05.  
   **Hecho cuando:** las pruebas cubren `idle`, confirmación, procesamiento, éxito, advertencia, error y cancelación.
 
-- [ ] **12. Implementar la máquina de estados y el descarte por `requestId`.**  
+- [x] **12. Implementar la máquina de estados y el descarte por `requestId`.**  
   **RF:** RF-02, RF-05.  
   **Hecho cuando:** una segunda solicitud durante procesamiento se rechaza y una respuesta tardía de una sesión inactiva no cambia el estado.
 

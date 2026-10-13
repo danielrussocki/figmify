@@ -79,4 +79,23 @@ describe('import state machine', () => {
 
     expect(machine.state).toBe('cancelled')
   })
+
+  it('rejects a second request while processing', () => {
+    const machine = createImportStateMachine()
+
+    expect(machine.requestImport(requestId, false)).toBe(true)
+    expect(machine.requestImport('request-456', false)).toBe(false)
+
+    expect(machine.state).toBe('processing')
+  })
+
+  it('discards a late result from an inactive session', () => {
+    const machine = createImportStateMachine()
+
+    machine.requestImport(requestId, false)
+    machine.cancel(requestId)
+
+    expect(machine.complete(requestId, 'success')).toBe(false)
+    expect(machine.state).toBe('cancelled')
+  })
 })
