@@ -6,7 +6,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01, RF-03, RF-05, RF-06.  
   **Hecho cuando:** `http://127.0.0.1:3000/v1/figma` responde para la fixture elegida y se registra el resultado esperado de éxito y de error.
 
-- [ ] **02. Añadir `esbuild` como dependencia de desarrollo y definir la compilación de las entradas del plugin.**  
+- [x] **02. Añadir `esbuild` como dependencia de desarrollo y definir la compilación de las entradas del plugin.**
   **RF:** RF-01 a RF-06.  
   **Hecho cuando:** el comando de compilación genera los artefactos de las dos entradas sin modificar manualmente archivos generados.
 
