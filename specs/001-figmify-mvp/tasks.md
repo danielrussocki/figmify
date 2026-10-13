@@ -58,7 +58,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01, RF-06.  
   **Hecho cuando:** la prueba real verifica `GET /v1/figma`, la URL transmitida como parámetro, `includeHidden=false` y la ausencia de autenticación.
 
-- [ ] **15. Implementar el cliente único de API v1.**  
+- [x] **15. Implementar el cliente único de API v1.**
   **RF:** RF-01, RF-05, RF-06.  
   **Hecho cuando:** el cliente usa la base local, reenvía la URL sin validación semántica, propaga errores de API en inglés y admite cancelación.
 
