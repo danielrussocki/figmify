@@ -10,7 +10,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01 a RF-06.  
   **Hecho cuando:** el comando de compilación genera los artefactos de las dos entradas sin modificar manualmente archivos generados.
 
-- [ ] **03. Añadir Vitest y los comandos de prueba unitaria e integración.**  
+- [x] **03. Añadir Vitest y los comandos de prueba unitaria e integración.**
   **RF:** RF-01 a RF-06.  
   **Hecho cuando:** existe un comando de tests que ejecuta una prueba vacía correctamente.
 

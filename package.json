@@ -5,7 +5,10 @@
   "main": "dist/code.js",
   "scripts": {
     "build": "esbuild code.ts ui.ts --bundle --target=es2020 --outdir=dist --outbase=.",
+    "test": "npm run test:unit && npm run test:integration",
     "test:build": "node --test test/build-output.test.mjs",
+    "test:integration": "vitest run test/integration",
+    "test:unit": "vitest run test/unit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "watch": "npm run build -- --watch"
@@ -19,6 +22,7 @@
     "esbuild": "^0.27.3",
     "eslint": "^9.39.4",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.1"
+    "typescript-eslint": "^8.57.1",
+    "vitest": "^5.0.4"
   }
 }
