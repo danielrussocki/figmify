@@ -138,7 +138,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01, RF-06.  
   **Hecho cuando:** `devAllowedDomains` usa `http://localhost:3000` como URL de desarrollo válida y Figma carga el manifiesto sin errores de validación.
 
-- [ ] **35. Implementar y probar el mapeo de caracteres y propiedades de texto.**  
+- [x] **35. Implementar y probar el mapeo de caracteres y propiedades de texto.**  
   **RF:** RF-03.  
   **Hecho cuando:** caracteres, tamaño, alineación, espaciado, altura de línea y sustituciones de fuente se conservan en el plan.
 

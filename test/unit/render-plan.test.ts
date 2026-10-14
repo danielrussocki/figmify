@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { FigmaNode, FigmaStyleCatalog } from '../../src/contracts/api-v1'
+import type { PlannedFontUse } from '../../src/domain/font-substitution'
 import { buildRenderPlan } from '../../src/domain/render-plan'
 
 const root: FigmaNode = {
@@ -283,6 +284,89 @@ describe('render plan reusable color styles', () => {
 
     expect(buildRenderPlan(uniqueColorFrame, colorCatalog)).toMatchObject({
       fillColorStyleIds: [undefined],
+    })
+  })
+})
+
+describe('render plan text properties', () => {
+  it('preserves characters and text properties while applying the planned font substitution', () => {
+    const headline: FigmaNode = {
+      id: 'headline',
+      tag: 'h1',
+      type: 'TEXT',
+      rect: { x: 80, y: 96, width: 500, height: 72, top: 96, left: 80 },
+      isVisible: true,
+      characters: 'Build faster',
+      styles: {
+        fontFamily: 'Unavailable Sans',
+        fontSize: 56,
+        fontWeight: 700,
+        lineHeight: 64,
+        letterSpacing: -1.2,
+        textAlign: 'CENTER',
+        textAutoResize: 'HEIGHT',
+      },
+      children: [],
+    }
+    const fontSubstitutions: readonly PlannedFontUse[] = [
+      { id: 'headline', font: { family: 'Inter', style: 'Bold' } },
+    ]
+
+    expect(buildRenderPlan(headline, undefined, fontSubstitutions)).toMatchObject({
+      text: {
+        characters: 'Build faster',
+        font: { family: 'Inter', style: 'Bold' },
+        fontSize: 56,
+        fontWeight: 700,
+        lineHeight: 64,
+        letterSpacing: -1.2,
+        textAlign: 'CENTER',
+        textAutoResize: 'HEIGHT',
+      },
+    })
+  })
+
+  it('applies substitutions to matching text nodes throughout the hierarchy', () => {
+    const textTree: FigmaNode = {
+      id: 'root',
+      tag: 'main',
+      type: 'FRAME',
+      rect: { x: 0, y: 0, width: 320, height: 180, top: 0, left: 0 },
+      isVisible: true,
+      children: [
+        {
+          id: 'body-copy',
+          tag: 'p',
+          type: 'TEXT',
+          rect: { x: 16, y: 16, width: 288, height: 48, top: 16, left: 16 },
+          isVisible: true,
+          characters: 'Editable copy',
+          styles: {
+            fontFamily: 'Unavailable Sans',
+            fontSize: 16,
+            fontWeight: 400,
+            lineHeight: 24,
+            letterSpacing: 0,
+            textAlign: 'LEFT',
+            textAutoResize: 'WIDTH_AND_HEIGHT',
+          },
+          children: [],
+        },
+      ],
+    }
+    const fontSubstitutions: readonly PlannedFontUse[] = [
+      { id: 'body-copy', font: { family: 'Roboto', style: 'Regular' } },
+    ]
+
+    expect(buildRenderPlan(textTree, undefined, fontSubstitutions)).toMatchObject({
+      children: [
+        {
+          text: {
+            characters: 'Editable copy',
+            font: { family: 'Roboto', style: 'Regular' },
+          },
+        },
+      ],
     })
   })
 })

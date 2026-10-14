@@ -17,6 +17,8 @@ import type {
   FigmaStroke,
   FigmaStrokeWeights,
 } from '../contracts/api-v1'
+import type { AvailableFont } from '../contracts/messages'
+import type { PlannedFontUse } from './font-substitution'
 
 export interface RenderPlanGeometry {
   readonly x: number
@@ -57,6 +59,18 @@ export interface RenderPlanAutoLayout {
   readonly position?: FigmaPosition
 }
 
+export interface RenderPlanText {
+  readonly characters?: string
+  readonly font?: AvailableFont
+  readonly fontFamily?: string
+  readonly fontSize?: number
+  readonly fontWeight?: number
+  readonly lineHeight?: number
+  readonly letterSpacing?: number
+  readonly textAlign?: FigmaNode['styles']['textAlign']
+  readonly textAutoResize?: FigmaNode['styles']['textAutoResize']
+}
+
 export interface RenderPlanNode extends RenderPlanAutoLayout {
   readonly id: string
   readonly type: FigmaNodeType
@@ -72,6 +86,7 @@ export interface RenderPlanNode extends RenderPlanAutoLayout {
   readonly cornerRadius?: number
   readonly cornerRadii?: FigmaCornerRadii
   readonly effects?: readonly RenderPlanEffect[] | null
+  readonly text?: RenderPlanText
   readonly children: readonly RenderPlanNode[]
 }
 
@@ -139,8 +154,41 @@ function solidPaintsFrom(fills: readonly FigmaPaint[]): readonly FigmaSolidPaint
   return fills.filter(isSolidPaint)
 }
 
-export function buildRenderPlan(node: FigmaNode, styles?: FigmaStyleCatalog): RenderPlanNode {
+function textFrom(node: FigmaNode, fontSubstitutions: ReadonlyMap<string, AvailableFont>): RenderPlanText | undefined {
+  if (node.type !== 'TEXT') {
+    return undefined
+  }
+
+  const font = fontSubstitutions.get(node.id)
+
+  if (node.characters === undefined && node.styles === undefined && font === undefined) {
+    return undefined
+  }
+
+  return {
+    ...(node.characters === undefined ? {} : { characters: node.characters }),
+    ...(font === undefined ? {} : { font: { ...font } }),
+    ...(node.styles === undefined
+      ? {}
+      : {
+          fontFamily: node.styles.fontFamily,
+          fontSize: node.styles.fontSize,
+          fontWeight: node.styles.fontWeight,
+          lineHeight: node.styles.lineHeight,
+          letterSpacing: node.styles.letterSpacing,
+          textAlign: node.styles.textAlign,
+          textAutoResize: node.styles.textAutoResize,
+        }),
+  }
+}
+
+function buildRenderPlanNode(
+  node: FigmaNode,
+  styles: FigmaStyleCatalog | undefined,
+  fontSubstitutions: ReadonlyMap<string, AvailableFont>,
+): RenderPlanNode {
   const solidFills = node.fills === undefined ? undefined : solidPaintsFrom(node.fills)
+  const text = textFrom(node, fontSubstitutions)
 
   return {
     id: node.id,
@@ -167,6 +215,7 @@ export function buildRenderPlan(node: FigmaNode, styles?: FigmaStyleCatalog): Re
     ...(node.cornerRadius === undefined ? {} : { cornerRadius: node.cornerRadius }),
     ...(node.cornerRadii === undefined ? {} : { cornerRadii: cornerRadiiFrom(node.cornerRadii) }),
     ...(node.effects === undefined ? {} : { effects: node.effects === null ? null : node.effects.map(effectFrom) }),
+    ...(text === undefined ? {} : { text }),
     ...(node.layoutMode === undefined ? {} : { layoutMode: node.layoutMode }),
     ...(node.itemSpacing === undefined ? {} : { itemSpacing: node.itemSpacing }),
     ...(node.gap === undefined ? {} : { gap: node.gap }),
@@ -175,6 +224,16 @@ export function buildRenderPlan(node: FigmaNode, styles?: FigmaStyleCatalog): Re
     ...(node.counterAxisAlign === undefined ? {} : { counterAxisAlign: node.counterAxisAlign }),
     ...(node.layoutGrow === undefined ? {} : { layoutGrow: node.layoutGrow }),
     ...(node.position === undefined ? {} : { position: node.position }),
-    children: node.children.map((child) => buildRenderPlan(child, styles)),
+    children: node.children.map((child) => buildRenderPlanNode(child, styles, fontSubstitutions)),
   }
+}
+
+export function buildRenderPlan(
+  node: FigmaNode,
+  styles?: FigmaStyleCatalog,
+  plannedFontUses: readonly PlannedFontUse[] = [],
+): RenderPlanNode {
+  const fontSubstitutions = new Map(plannedFontUses.map((plannedFontUse) => [plannedFontUse.id, plannedFontUse.font]))
+
+  return buildRenderPlanNode(node, styles, fontSubstitutions)
 }
