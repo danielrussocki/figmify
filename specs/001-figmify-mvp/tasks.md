@@ -82,7 +82,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01, RF-04.  
   **Hecho cuando:** la interfaz emite `IMPORT_REQUEST`, presenta `add`/`cancel` cuando corresponde y no llama directamente a la API.
 
-- [ ] **21. Implementar estados visuales de procesamiento, cancelación y reintento.**  
+- [x] **21. Implementar estados visuales de procesamiento, cancelación y reintento.**  
   **RF:** RF-02, RF-05.  
   **Hecho cuando:** la interfaz bloquea envíos duplicados durante `processing`, permite cancelar y vuelve a aceptar solicitudes tras éxito, error o cancelación.
 
