@@ -70,7 +70,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-04, RF-05.  
   **Hecho cuando:** el adaptador obtiene la página activa al inicio, puede comprobar si sigue existiendo y distingue si tiene nodos.
 
-- [ ] **18. Escribir pruebas de política de confirmación y ubicación.**  
+- [x] **18. Escribir pruebas de política de confirmación y ubicación.**  
   **RF:** RF-04, RF-05.  
   **Hecho cuando:** las pruebas cubren página vacía, añadir, cancelar, contenido añadido durante la espera, separación de 100 px y alineación superior.
 
