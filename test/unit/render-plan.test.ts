@@ -197,3 +197,35 @@ describe('render plan corner radii and effects', () => {
     expect(buildRenderPlan(effectlessFrame)).toMatchObject({ effects: null })
   })
 })
+
+describe('render plan Auto Layout', () => {
+  it('preserves direction, alignment, spacing, padding, and sizing adjustments', () => {
+    const autoLayoutFrame: FigmaNode = {
+      id: 'feature-list',
+      tag: 'ul',
+      type: 'FRAME',
+      rect: { x: 80, y: 160, width: 480, height: 320, top: 160, left: 80 },
+      isVisible: true,
+      layoutMode: 'VERTICAL',
+      itemSpacing: 16,
+      gap: 20,
+      padding: { top: 24, right: 32, bottom: 40, left: 32 },
+      primaryAxisAlign: 'SPACE_BETWEEN',
+      counterAxisAlign: 'CENTER',
+      layoutGrow: 1,
+      position: 'absolute',
+      children: [],
+    }
+
+    expect(buildRenderPlan(autoLayoutFrame)).toMatchObject({
+      layoutMode: 'VERTICAL',
+      itemSpacing: 16,
+      gap: 20,
+      padding: { top: 24, right: 32, bottom: 40, left: 32 },
+      primaryAxisAlign: 'SPACE_BETWEEN',
+      counterAxisAlign: 'CENTER',
+      layoutGrow: 1,
+      position: 'absolute',
+    })
+  })
+})

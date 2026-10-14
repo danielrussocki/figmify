@@ -126,7 +126,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03.  
   **Hecho cuando:** radios de esquina, sombras y efectos de una fixture v1 se reflejan individualmente en el plan.
 
-- [ ] **32. Implementar y probar el mapeo de Auto Layout.**  
+- [x] **32. Implementar y probar el mapeo de Auto Layout.**  
   **RF:** RF-03.  
   **Hecho cuando:** dirección, alineación, espaciado, relleno y ajuste de tamaño de un nodo con Auto Layout se conservan en el plan.
 

@@ -3,7 +3,12 @@ import type {
   FigmaEffect,
   FigmaNode,
   FigmaNodeType,
+  FigmaPadding,
   FigmaPaint,
+  FigmaPosition,
+  FigmaCounterAxisAlign,
+  FigmaLayoutMode,
+  FigmaPrimaryAxisAlign,
   FigmaRect,
   FigmaRgbaColor,
   FigmaSolidPaint,
@@ -39,7 +44,18 @@ export interface RenderPlanEffect {
   readonly spread: number
 }
 
-export interface RenderPlanNode {
+export interface RenderPlanAutoLayout {
+  readonly layoutMode?: FigmaLayoutMode
+  readonly itemSpacing?: number
+  readonly gap?: number
+  readonly padding?: FigmaPadding
+  readonly primaryAxisAlign?: FigmaPrimaryAxisAlign
+  readonly counterAxisAlign?: FigmaCounterAxisAlign
+  readonly layoutGrow?: number
+  readonly position?: FigmaPosition
+}
+
+export interface RenderPlanNode extends RenderPlanAutoLayout {
   readonly id: string
   readonly type: FigmaNodeType
   readonly geometry: RenderPlanGeometry
@@ -102,6 +118,10 @@ function effectFrom(effect: FigmaEffect): RenderPlanEffect {
   }
 }
 
+function paddingFrom(padding: FigmaPadding): FigmaPadding {
+  return { ...padding }
+}
+
 export function buildRenderPlan(node: FigmaNode): RenderPlanNode {
   return {
     id: node.id,
@@ -118,6 +138,14 @@ export function buildRenderPlan(node: FigmaNode): RenderPlanNode {
     ...(node.cornerRadius === undefined ? {} : { cornerRadius: node.cornerRadius }),
     ...(node.cornerRadii === undefined ? {} : { cornerRadii: cornerRadiiFrom(node.cornerRadii) }),
     ...(node.effects === undefined ? {} : { effects: node.effects === null ? null : node.effects.map(effectFrom) }),
+    ...(node.layoutMode === undefined ? {} : { layoutMode: node.layoutMode }),
+    ...(node.itemSpacing === undefined ? {} : { itemSpacing: node.itemSpacing }),
+    ...(node.gap === undefined ? {} : { gap: node.gap }),
+    ...(node.padding === undefined ? {} : { padding: paddingFrom(node.padding) }),
+    ...(node.primaryAxisAlign === undefined ? {} : { primaryAxisAlign: node.primaryAxisAlign }),
+    ...(node.counterAxisAlign === undefined ? {} : { counterAxisAlign: node.counterAxisAlign }),
+    ...(node.layoutGrow === undefined ? {} : { layoutGrow: node.layoutGrow }),
+    ...(node.position === undefined ? {} : { position: node.position }),
     children: node.children.map(buildRenderPlan),
   }
 }
