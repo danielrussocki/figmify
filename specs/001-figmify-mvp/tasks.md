@@ -122,7 +122,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03.  
   **Hecho cuando:** los rellenos sólidos, trazos y pesos de borde de una fixture v1 se conservan en el plan de renderizado.
 
-- [ ] **31. Implementar y probar el mapeo de radios y efectos.**  
+- [x] **31. Implementar y probar el mapeo de radios y efectos.**  
   **RF:** RF-03.  
   **Hecho cuando:** radios de esquina, sombras y efectos de una fixture v1 se reflejan individualmente en el plan.
 

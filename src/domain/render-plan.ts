@@ -1,4 +1,6 @@
 import type {
+  FigmaCornerRadii,
+  FigmaEffect,
   FigmaNode,
   FigmaNodeType,
   FigmaPaint,
@@ -26,6 +28,17 @@ export interface RenderPlanStroke extends RenderPlanSolidPaint {
   readonly weight: number
 }
 
+export interface RenderPlanEffect {
+  readonly type: FigmaEffect['type']
+  readonly color: FigmaRgbaColor
+  readonly offset: {
+    readonly x: number
+    readonly y: number
+  }
+  readonly radius: number
+  readonly spread: number
+}
+
 export interface RenderPlanNode {
   readonly id: string
   readonly type: FigmaNodeType
@@ -36,6 +49,9 @@ export interface RenderPlanNode {
   readonly strokes?: readonly RenderPlanStroke[] | null
   readonly strokeWeight?: number
   readonly strokeWeights?: FigmaStrokeWeights
+  readonly cornerRadius?: number
+  readonly cornerRadii?: FigmaCornerRadii
+  readonly effects?: readonly RenderPlanEffect[] | null
   readonly children: readonly RenderPlanNode[]
 }
 
@@ -72,6 +88,20 @@ function strokeWeightsFrom(weights: FigmaStrokeWeights): FigmaStrokeWeights {
   return { ...weights }
 }
 
+function cornerRadiiFrom(radii: FigmaCornerRadii): FigmaCornerRadii {
+  return { ...radii }
+}
+
+function effectFrom(effect: FigmaEffect): RenderPlanEffect {
+  return {
+    type: effect.type,
+    color: copyColor(effect.color),
+    offset: { ...effect.offset },
+    radius: effect.radius,
+    spread: effect.spread,
+  }
+}
+
 export function buildRenderPlan(node: FigmaNode): RenderPlanNode {
   return {
     id: node.id,
@@ -85,6 +115,9 @@ export function buildRenderPlan(node: FigmaNode): RenderPlanNode {
       : { strokes: node.strokes === null ? null : node.strokes.map(strokeFrom) }),
     ...(node.strokeWeight === undefined ? {} : { strokeWeight: node.strokeWeight }),
     ...(node.strokeWeights === undefined ? {} : { strokeWeights: strokeWeightsFrom(node.strokeWeights) }),
+    ...(node.cornerRadius === undefined ? {} : { cornerRadius: node.cornerRadius }),
+    ...(node.cornerRadii === undefined ? {} : { cornerRadii: cornerRadiiFrom(node.cornerRadii) }),
+    ...(node.effects === undefined ? {} : { effects: node.effects === null ? null : node.effects.map(effectFrom) }),
     children: node.children.map(buildRenderPlan),
   }
 }

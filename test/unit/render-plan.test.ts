@@ -131,3 +131,69 @@ describe('render plan solid paints and borders', () => {
     })
   })
 })
+
+describe('render plan corner radii and effects', () => {
+  it('preserves individual corner radii and every shadow effect from an API v1 fixture', () => {
+    const elevatedCard: FigmaNode = {
+      id: 'elevated-card',
+      tag: 'article',
+      type: 'FRAME',
+      rect: { x: 40, y: 72, width: 360, height: 240, top: 72, left: 40 },
+      isVisible: true,
+      cornerRadius: 12,
+      cornerRadii: { topLeft: 12, topRight: 16, bottomRight: 20, bottomLeft: 24 },
+      effects: [
+        {
+          type: 'DROP_SHADOW',
+          color: { r: 0, g: 0, b: 0, a: 0.2 },
+          offset: { x: 0, y: 8 },
+          radius: 24,
+          spread: 2,
+        },
+        {
+          type: 'INNER_SHADOW',
+          color: { r: 1, g: 1, b: 1, a: 0.3 },
+          offset: { x: 0, y: 1 },
+          radius: 3,
+          spread: 0,
+        },
+      ],
+      children: [],
+    }
+
+    expect(buildRenderPlan(elevatedCard)).toMatchObject({
+      cornerRadius: 12,
+      cornerRadii: { topLeft: 12, topRight: 16, bottomRight: 20, bottomLeft: 24 },
+      effects: [
+        {
+          type: 'DROP_SHADOW',
+          color: { r: 0, g: 0, b: 0, a: 0.2 },
+          offset: { x: 0, y: 8 },
+          radius: 24,
+          spread: 2,
+        },
+        {
+          type: 'INNER_SHADOW',
+          color: { r: 1, g: 1, b: 1, a: 0.3 },
+          offset: { x: 0, y: 1 },
+          radius: 3,
+          spread: 0,
+        },
+      ],
+    })
+  })
+
+  it('preserves a null effects value', () => {
+    const effectlessFrame: FigmaNode = {
+      id: 'effectless-frame',
+      tag: 'div',
+      type: 'FRAME',
+      rect: { x: 0, y: 0, width: 100, height: 100, top: 0, left: 0 },
+      isVisible: true,
+      effects: null,
+      children: [],
+    }
+
+    expect(buildRenderPlan(effectlessFrame)).toMatchObject({ effects: null })
+  })
+})
