@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { FigmaNode } from '../../src/contracts/api-v1'
+import type { FigmaNode, FigmaStyleCatalog } from '../../src/contracts/api-v1'
 import { buildRenderPlan } from '../../src/domain/render-plan'
 
 const root: FigmaNode = {
@@ -226,6 +226,63 @@ describe('render plan Auto Layout', () => {
       counterAxisAlign: 'CENTER',
       layoutGrow: 1,
       position: 'absolute',
+    })
+  })
+})
+
+describe('render plan reusable color styles', () => {
+  const colorCatalog: FigmaStyleCatalog = {
+    colors: [
+      { id: 'color-primary', name: 'Primary', rgba: { r: 0.05, g: 0.3, b: 0.9, a: 1 } },
+      { id: 'color-border', name: 'Border', rgba: { r: 0.8, g: 0.82, b: 0.86, a: 1 } },
+    ],
+    typographies: [],
+  }
+
+  it('resolves catalog color references for fills and strokes in every node', () => {
+    const styledRoot: FigmaNode = {
+      id: 'styled-root',
+      tag: 'main',
+      type: 'FRAME',
+      rect: { x: 0, y: 0, width: 320, height: 180, top: 0, left: 0 },
+      isVisible: true,
+      fills: [{ type: 'SOLID', color: { r: 0.05, g: 0.3, b: 0.9, a: 1 } }],
+      children: [
+        {
+          id: 'styled-card',
+          tag: 'article',
+          type: 'FRAME',
+          rect: { x: 16, y: 16, width: 288, height: 148, top: 16, left: 16 },
+          isVisible: true,
+          strokes: [{ type: 'SOLID', color: { r: 0.8, g: 0.82, b: 0.86, a: 1 }, weight: 1 }],
+          children: [],
+        },
+      ],
+    }
+
+    expect(buildRenderPlan(styledRoot, colorCatalog)).toMatchObject({
+      fillColorStyleIds: ['color-primary'],
+      children: [
+        {
+          strokeColorStyleIds: ['color-border'],
+        },
+      ],
+    })
+  })
+
+  it('does not assign a catalog reference when a color is not reusable', () => {
+    const uniqueColorFrame: FigmaNode = {
+      id: 'unique-color',
+      tag: 'div',
+      type: 'FRAME',
+      rect: { x: 0, y: 0, width: 100, height: 100, top: 0, left: 0 },
+      isVisible: true,
+      fills: [{ type: 'SOLID', color: { r: 0.4, g: 0.5, b: 0.6, a: 1 } }],
+      children: [],
+    }
+
+    expect(buildRenderPlan(uniqueColorFrame, colorCatalog)).toMatchObject({
+      fillColorStyleIds: [undefined],
     })
   })
 })

@@ -130,7 +130,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03.  
   **Hecho cuando:** dirección, alineación, espaciado, relleno y ajuste de tamaño de un nodo con Auto Layout se conservan en el plan.
 
-- [ ] **33. Implementar y probar el catálogo de colores y estilos reutilizables.**  
+- [x] **33. Implementar y probar el catálogo de colores y estilos reutilizables.**  
   **RF:** RF-03.  
   **Hecho cuando:** las referencias de color y estilo definidas en el catálogo v1 se resuelven correctamente en los nodos que las usan.
 

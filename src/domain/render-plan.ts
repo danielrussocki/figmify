@@ -1,4 +1,6 @@
 import type {
+  ColorStyleId,
+  FigmaStyleCatalog,
   FigmaCornerRadii,
   FigmaEffect,
   FigmaNode,
@@ -62,7 +64,9 @@ export interface RenderPlanNode extends RenderPlanAutoLayout {
   readonly isVisible: boolean
   readonly opacity: number
   readonly fills?: readonly RenderPlanSolidPaint[]
+  readonly fillColorStyleIds?: readonly (ColorStyleId | undefined)[]
   readonly strokes?: readonly RenderPlanStroke[] | null
+  readonly strokeColorStyleIds?: readonly (ColorStyleId | undefined)[] | null
   readonly strokeWeight?: number
   readonly strokeWeights?: FigmaStrokeWeights
   readonly cornerRadius?: number
@@ -122,17 +126,42 @@ function paddingFrom(padding: FigmaPadding): FigmaPadding {
   return { ...padding }
 }
 
-export function buildRenderPlan(node: FigmaNode): RenderPlanNode {
+function colorStyleIdFor(color: FigmaRgbaColor, styles: FigmaStyleCatalog): ColorStyleId | undefined {
+  return styles.colors.find((style) =>
+    style.rgba.r === color.r &&
+    style.rgba.g === color.g &&
+    style.rgba.b === color.b &&
+    style.rgba.a === color.a,
+  )?.id
+}
+
+function solidPaintsFrom(fills: readonly FigmaPaint[]): readonly FigmaSolidPaint[] {
+  return fills.filter(isSolidPaint)
+}
+
+export function buildRenderPlan(node: FigmaNode, styles?: FigmaStyleCatalog): RenderPlanNode {
+  const solidFills = node.fills === undefined ? undefined : solidPaintsFrom(node.fills)
+
   return {
     id: node.id,
     type: node.type,
     geometry: geometryFrom(node.relativeRect ?? node.rect),
     isVisible: node.isVisible,
     opacity: node.opacity ?? 1,
-    ...(node.fills === undefined ? {} : { fills: node.fills.filter(isSolidPaint).map(solidPaintFrom) }),
+    ...(solidFills === undefined ? {} : { fills: solidFills.map(solidPaintFrom) }),
+    ...(solidFills === undefined || styles === undefined
+      ? {}
+      : { fillColorStyleIds: solidFills.map((fill) => colorStyleIdFor(fill.color, styles)) }),
     ...(node.strokes === undefined
       ? {}
       : { strokes: node.strokes === null ? null : node.strokes.map(strokeFrom) }),
+    ...(node.strokes === undefined || styles === undefined
+      ? {}
+      : {
+          strokeColorStyleIds: node.strokes === null
+            ? null
+            : node.strokes.map((stroke) => colorStyleIdFor(stroke.color, styles)),
+        }),
     ...(node.strokeWeight === undefined ? {} : { strokeWeight: node.strokeWeight }),
     ...(node.strokeWeights === undefined ? {} : { strokeWeights: strokeWeightsFrom(node.strokeWeights) }),
     ...(node.cornerRadius === undefined ? {} : { cornerRadius: node.cornerRadius }),
@@ -146,6 +175,6 @@ export function buildRenderPlan(node: FigmaNode): RenderPlanNode {
     ...(node.counterAxisAlign === undefined ? {} : { counterAxisAlign: node.counterAxisAlign }),
     ...(node.layoutGrow === undefined ? {} : { layoutGrow: node.layoutGrow }),
     ...(node.position === undefined ? {} : { position: node.position }),
-    children: node.children.map(buildRenderPlan),
+    children: node.children.map((child) => buildRenderPlan(child, styles)),
   }
 }
