@@ -94,7 +94,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03.  
   **Hecho cuando:** el adaptador lista fuentes disponibles, detecta fuentes ausentes y carga la elegida o la fuente predeterminada de Figma antes de crear texto.
 
-- [ ] **24. Escribir pruebas de agrupación y sustitución tipográfica.**  
+- [x] **24. Escribir pruebas de agrupación y sustitución tipográfica.**  
   **RF:** RF-03.  
   **Hecho cuando:** las pruebas prueban una elección por familia/estilo, su aplicación a todos los usos y el uso de la fuente predeterminada al cancelar.
 
