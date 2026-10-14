@@ -134,58 +134,62 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03.  
   **Hecho cuando:** las referencias de color y estilo definidas en el catálogo v1 se resuelven correctamente en los nodos que las usan.
 
-- [ ] **34. Implementar y probar el mapeo de caracteres y propiedades de texto.**  
+- [x] **34. Corregir y verificar el dominio de desarrollo del manifiesto.**  
+  **RF:** RF-01, RF-06.  
+  **Hecho cuando:** `devAllowedDomains` usa `http://localhost:3000` como URL de desarrollo válida y Figma carga el manifiesto sin errores de validación.
+
+- [ ] **35. Implementar y probar el mapeo de caracteres y propiedades de texto.**  
   **RF:** RF-03.  
   **Hecho cuando:** caracteres, tamaño, alineación, espaciado, altura de línea y sustituciones de fuente se conservan en el plan.
 
-- [ ] **35. Implementar y probar el mapeo de pinturas de imagen y marcadores.**  
+- [ ] **36. Implementar y probar el mapeo de pinturas de imagen y marcadores.**  
   **RF:** RF-03.  
   **Hecho cuando:** una imagen resuelta se asigna como pintura y una no resuelta se sustituye por el marcador definido.
 
-- [ ] **36. Escribir pruebas de atomicidad del renderizador de Figma.**  
+- [ ] **37. Escribir pruebas de atomicidad del renderizador de Figma.**  
   **RF:** RF-03, RF-04, RF-05.  
   **Hecho cuando:** los fallos de nodo, fuente o recurso eliminan la raíz temporal y preservan todos los nodos previos.
 
-- [ ] **37. Implementar la raíz temporal invisible y su limpieza.**  
+- [ ] **38. Implementar la raíz temporal invisible y su limpieza.**  
   **RF:** RF-03, RF-05.  
   **Hecho cuando:** la raíz temporal permanece oculta y se elimina ante error, cancelación o desaparición de la página.
 
-- [ ] **38. Implementar el renderizado recursivo del plan completo.**  
+- [ ] **39. Implementar el renderizado recursivo del plan completo.**  
   **RF:** RF-03.  
   **Hecho cuando:** el renderizador crea la jerarquía, propiedades y recursos del plan dentro de la raíz temporal.
 
-- [ ] **39. Implementar la confirmación final y la visibilidad del diseño.**  
+- [ ] **40. Implementar la confirmación final y la visibilidad del diseño.**  
   **RF:** RF-03, RF-04, RF-05.  
   **Hecho cuando:** el diseño se hace visible en la página de inicio y se mueve al destino calculado solo después de completar el renderizado.
 
-- [ ] **40. Escribir pruebas de orquestación de la ruta de éxito.**  
+- [ ] **41. Escribir pruebas de orquestación de la ruta de éxito.**  
   **RF:** RF-01, RF-02, RF-03, RF-04, RF-06.  
   **Hecho cuando:** una respuesta v1 válida recorre solicitud, fuentes, recursos, renderizado, ubicación y estado final de éxito o advertencia.
 
-- [ ] **41. Implementar la orquestación desde solicitud hasta respuesta validada.**  
+- [ ] **42. Implementar la orquestación desde solicitud hasta respuesta validada.**  
   **RF:** RF-01, RF-02, RF-05, RF-06.  
   **Hecho cuando:** el caso de uso conecta mensajes, sesión, confirmación inicial, cliente API y validación de respuesta.
 
-- [ ] **42. Integrar fuentes, recursos y renderizador en el caso de uso.**  
+- [ ] **43. Integrar fuentes, recursos y renderizador en el caso de uso.**  
   **RF:** RF-03, RF-04.  
   **Hecho cuando:** una respuesta validada genera el selector de fuentes cuando corresponde y confirma el diseño renderizado en el destino correcto.
 
-- [ ] **43. Escribir pruebas de errores de orquestación.**  
+- [ ] **44. Escribir pruebas de errores de orquestación.**  
   **RF:** RF-01, RF-03, RF-05.  
   **Hecho cuando:** las pruebas verifican error de API, red, contrato inválido, página eliminada y fallo de creación con sus mensajes definidos.
 
-- [ ] **44. Implementar los caminos de error y reintento de la orquestación.**  
+- [ ] **45. Implementar los caminos de error y reintento de la orquestación.**  
   **RF:** RF-01, RF-03, RF-05.  
   **Hecho cuando:** cada error termina la sesión sin mutaciones y la interfaz queda lista para solicitar otra importación.
 
-- [ ] **45. Escribir pruebas de carrera y ciclo de vida.**  
+- [ ] **46. Escribir pruebas de carrera y ciclo de vida.**  
   **RF:** RF-02, RF-04, RF-05.  
   **Hecho cuando:** las pruebas cubren cancelación, cierre, respuesta tardía, cambio de página, eliminación de la página inicial y cambios de contenido durante la espera.
 
-- [ ] **46. Implementar el descarte de resultados en carreras y cierres.**  
+- [ ] **47. Implementar el descarte de resultados en carreras y cierres.**  
   **RF:** RF-02, RF-05.  
   **Hecho cuando:** ningún resultado tardío, cancelado o asociado a una página eliminada añade o modifica elementos.
 
-- [ ] **47. Ejecutar la verificación final de manifiesto, build, lint y suites.**  
+- [ ] **48. Ejecutar la verificación final de manifiesto, build, lint y suites.**  
   **RF:** RF-01 a RF-06.  
   **Hecho cuando:** la verificación de manifiesto, build, lint, tests unitarios e integración HTTP local real finalizan correctamente.

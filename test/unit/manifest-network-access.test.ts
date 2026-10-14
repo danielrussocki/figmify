@@ -7,7 +7,7 @@ describe('manifest network access', () => {
       allowedDomains: ['*'],
       reasoning:
         'Figmify imports web designs and their public image resources from domains returned by API v1.',
-      devAllowedDomains: ['http://127.0.0.1:3000'],
+      devAllowedDomains: ['http://localhost:3000'],
     })
   })
 })
