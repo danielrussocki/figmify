@@ -66,7 +66,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01, RF-03, RF-05.  
   **Hecho cuando:** cada caso termina sin un documento de éxito y produce el mensaje en inglés definido por la spec.
 
-- [ ] **17. Implementar la lectura de la página de inicio y su existencia.**  
+- [x] **17. Implementar la lectura de la página de inicio y su existencia.**
   **RF:** RF-04, RF-05.  
   **Hecho cuando:** el adaptador obtiene la página activa al inicio, puede comprobar si sigue existiendo y distingue si tiene nodos.
 
