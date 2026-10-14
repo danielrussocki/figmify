@@ -118,7 +118,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03.  
   **Hecho cuando:** una fixture v1 de marcos anidados genera un plan equivalente sin llamar a Figma ni a la interfaz.
 
-- [ ] **30. Implementar y probar el mapeo de pinturas sólidas y bordes.**  
+- [x] **30. Implementar y probar el mapeo de pinturas sólidas y bordes.
   **RF:** RF-03.  
   **Hecho cuando:** los rellenos sólidos, trazos y pesos de borde de una fixture v1 se conservan en el plan de renderizado.
 

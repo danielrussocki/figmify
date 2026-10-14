@@ -98,3 +98,36 @@ describe('render plan hierarchy and geometry', () => {
     })
   })
 })
+
+describe('render plan solid paints and borders', () => {
+  it('preserves solid fills, strokes, and border weights from an API v1 fixture', () => {
+    const paintedFrame: FigmaNode = {
+      id: 'painted-frame',
+      tag: 'section',
+      type: 'FRAME',
+      rect: { x: 0, y: 0, width: 320, height: 180, top: 0, left: 0 },
+      isVisible: true,
+      fills: [
+        { type: 'SOLID', color: { r: 0.1, g: 0.2, b: 0.3, a: 0.75 } },
+        { type: 'IMAGE', src: 'https://images.example.com/ignored-until-task-35.jpg', scaleMode: 'FILL' },
+      ],
+      strokes: [
+        { type: 'SOLID', color: { r: 1, g: 0, b: 0, a: 1 }, side: 'TOP', weight: 2 },
+        { type: 'SOLID', color: { r: 0, g: 0, b: 1, a: 0.5 }, side: 'BOTTOM', weight: 4 },
+      ],
+      strokeWeight: 3,
+      strokeWeights: { top: 2, right: 3, bottom: 4, left: 5 },
+      children: [],
+    }
+
+    expect(buildRenderPlan(paintedFrame)).toMatchObject({
+      fills: [{ type: 'SOLID', color: { r: 0.1, g: 0.2, b: 0.3, a: 0.75 } }],
+      strokes: [
+        { type: 'SOLID', color: { r: 1, g: 0, b: 0, a: 1 }, side: 'TOP', weight: 2 },
+        { type: 'SOLID', color: { r: 0, g: 0, b: 1, a: 0.5 }, side: 'BOTTOM', weight: 4 },
+      ],
+      strokeWeight: 3,
+      strokeWeights: { top: 2, right: 3, bottom: 4, left: 5 },
+    })
+  })
+})
