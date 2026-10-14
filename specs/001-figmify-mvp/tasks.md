@@ -78,7 +78,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-04, RF-05.  
   **Hecho cuando:** una página vacía devuelve `(0, 0)` y una página con contenido devuelve `(right + 100, top)` sin incluir la raíz temporal.
 
-- [ ] **20. Implementar el formulario de URL y la solicitud de añadir/cancelar.**  
+- [x] **20. Implementar el formulario de URL y la solicitud de añadir/cancelar.**  
   **RF:** RF-01, RF-04.  
   **Hecho cuando:** la interfaz emite `IMPORT_REQUEST`, presenta `add`/`cancel` cuando corresponde y no llama directamente a la API.
 
