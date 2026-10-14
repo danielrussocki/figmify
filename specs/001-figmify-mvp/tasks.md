@@ -106,7 +106,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03.  
   **Hecho cuando:** las pruebas cubren recurso resoluble, fallo de `createImageAsync`, marcador con misma geometría y etiqueta en inglés.
 
-- [ ] **27. Implementar el resolvedor de recursos no tipográficos.**  
+- [x] **27. Implementar el resolvedor de recursos no tipográficos.**  
   **RF:** RF-03.  
   **Hecho cuando:** imágenes e iconos se resuelven mediante `figma.createImageAsync(URL)` y los fallos se convierten en entradas de marcador sin abortar la importación.
 
