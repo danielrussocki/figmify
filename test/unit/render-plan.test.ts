@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { FigmaNode, FigmaStyleCatalog } from '../../src/contracts/api-v1'
 import type { PlannedFontUse } from '../../src/domain/font-substitution'
-import { buildRenderPlan } from '../../src/domain/render-plan'
+import { buildRenderPlan, type PlannedNonTypographyResource } from '../../src/domain/render-plan'
 
 const root: FigmaNode = {
   id: 'root',
@@ -367,6 +367,42 @@ describe('render plan text properties', () => {
           },
         },
       ],
+    })
+  })
+})
+
+describe('render plan image paints and placeholders', () => {
+  const heroImage: FigmaNode = {
+    id: 'hero-image',
+    tag: 'img',
+    type: 'IMAGE',
+    rect: { x: 80, y: 208, width: 640, height: 360, top: 208, left: 80 },
+    isVisible: true,
+    fills: [{ type: 'IMAGE', src: 'https://images.example.com/hero.jpg', scaleMode: 'FILL' }],
+    children: [],
+  }
+
+  it('assigns a resolved image as an IMAGE paint', () => {
+    const resources: readonly PlannedNonTypographyResource[] = [
+      { id: 'hero-image', kind: 'resolved', imageHash: 'hero-image-hash' },
+    ]
+
+    expect(buildRenderPlan(heroImage, undefined, [], resources)).toMatchObject({
+      fills: [{ type: 'IMAGE', imageHash: 'hero-image-hash', scaleMode: 'FILL' }],
+    })
+  })
+
+  it('replaces an unresolved image with the defined placeholder', () => {
+    const resources: readonly PlannedNonTypographyResource[] = [
+      { id: 'hero-image', kind: 'placeholder', label: 'Image resource unavailable.' },
+    ]
+
+    expect(buildRenderPlan(heroImage, undefined, [], resources)).toMatchObject({
+      fills: [],
+      placeholder: {
+        geometry: { x: 80, y: 208, width: 640, height: 360 },
+        label: 'Image resource unavailable.',
+      },
     })
   })
 })

@@ -142,7 +142,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03.  
   **Hecho cuando:** caracteres, tamaño, alineación, espaciado, altura de línea y sustituciones de fuente se conservan en el plan.
 
-- [ ] **36. Implementar y probar el mapeo de pinturas de imagen y marcadores.**  
+- [x] **36. Implementar y probar el mapeo de pinturas de imagen y marcadores.**  
   **RF:** RF-03.  
   **Hecho cuando:** una imagen resuelta se asigna como pintura y una no resuelta se sustituye por el marcador definido.
 

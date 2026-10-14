@@ -32,6 +32,33 @@ export interface RenderPlanSolidPaint {
   readonly color: FigmaRgbaColor
 }
 
+export interface RenderPlanImagePaint {
+  readonly type: 'IMAGE'
+  readonly imageHash: string
+  readonly scaleMode: 'FILL'
+}
+
+export type RenderPlanPaint = RenderPlanSolidPaint | RenderPlanImagePaint
+
+export interface RenderPlanPlaceholder {
+  readonly geometry: RenderPlanGeometry
+  readonly label: string
+}
+
+export interface ResolvedPlannedResource {
+  readonly id: string
+  readonly kind: 'resolved'
+  readonly imageHash: string
+}
+
+export interface PlaceholderPlannedResource {
+  readonly id: string
+  readonly kind: 'placeholder'
+  readonly label: string
+}
+
+export type PlannedNonTypographyResource = ResolvedPlannedResource | PlaceholderPlannedResource
+
 export interface RenderPlanStroke extends RenderPlanSolidPaint {
   readonly side?: FigmaStroke['side']
   readonly weight: number
@@ -77,7 +104,7 @@ export interface RenderPlanNode extends RenderPlanAutoLayout {
   readonly geometry: RenderPlanGeometry
   readonly isVisible: boolean
   readonly opacity: number
-  readonly fills?: readonly RenderPlanSolidPaint[]
+  readonly fills?: readonly RenderPlanPaint[]
   readonly fillColorStyleIds?: readonly (ColorStyleId | undefined)[]
   readonly strokes?: readonly RenderPlanStroke[] | null
   readonly strokeColorStyleIds?: readonly (ColorStyleId | undefined)[] | null
@@ -87,6 +114,7 @@ export interface RenderPlanNode extends RenderPlanAutoLayout {
   readonly cornerRadii?: FigmaCornerRadii
   readonly effects?: readonly RenderPlanEffect[] | null
   readonly text?: RenderPlanText
+  readonly placeholder?: RenderPlanPlaceholder
   readonly children: readonly RenderPlanNode[]
 }
 
@@ -117,6 +145,10 @@ function strokeFrom(stroke: FigmaStroke): RenderPlanStroke {
 
 function isSolidPaint(paint: FigmaPaint): paint is FigmaSolidPaint {
   return paint.type === 'SOLID'
+}
+
+function isImagePaint(paint: FigmaPaint): paint is Extract<FigmaPaint, { type: 'IMAGE' }> {
+  return paint.type === 'IMAGE'
 }
 
 function strokeWeightsFrom(weights: FigmaStrokeWeights): FigmaStrokeWeights {
@@ -150,8 +182,21 @@ function colorStyleIdFor(color: FigmaRgbaColor, styles: FigmaStyleCatalog): Colo
   )?.id
 }
 
-function solidPaintsFrom(fills: readonly FigmaPaint[]): readonly FigmaSolidPaint[] {
-  return fills.filter(isSolidPaint)
+function fillPaintsFrom(
+  fills: readonly FigmaPaint[],
+  resource: PlannedNonTypographyResource | undefined,
+): readonly RenderPlanPaint[] {
+  return fills.flatMap((paint): readonly RenderPlanPaint[] => {
+    if (isSolidPaint(paint)) {
+      return [solidPaintFrom(paint)]
+    }
+
+    if (isImagePaint(paint) && resource?.kind === 'resolved') {
+      return [{ type: 'IMAGE', imageHash: resource.imageHash, scaleMode: paint.scaleMode }]
+    }
+
+    return []
+  })
 }
 
 function textFrom(node: FigmaNode, fontSubstitutions: ReadonlyMap<string, AvailableFont>): RenderPlanText | undefined {
@@ -186,8 +231,11 @@ function buildRenderPlanNode(
   node: FigmaNode,
   styles: FigmaStyleCatalog | undefined,
   fontSubstitutions: ReadonlyMap<string, AvailableFont>,
+  resources: ReadonlyMap<string, PlannedNonTypographyResource>,
 ): RenderPlanNode {
-  const solidFills = node.fills === undefined ? undefined : solidPaintsFrom(node.fills)
+  const resource = resources.get(node.id)
+  const fills = node.fills === undefined ? undefined : fillPaintsFrom(node.fills, resource)
+  const solidFills = fills?.filter((fill): fill is RenderPlanSolidPaint => fill.type === 'SOLID')
   const text = textFrom(node, fontSubstitutions)
 
   return {
@@ -196,7 +244,7 @@ function buildRenderPlanNode(
     geometry: geometryFrom(node.relativeRect ?? node.rect),
     isVisible: node.isVisible,
     opacity: node.opacity ?? 1,
-    ...(solidFills === undefined ? {} : { fills: solidFills.map(solidPaintFrom) }),
+    ...(fills === undefined ? {} : { fills }),
     ...(solidFills === undefined || styles === undefined
       ? {}
       : { fillColorStyleIds: solidFills.map((fill) => colorStyleIdFor(fill.color, styles)) }),
@@ -216,6 +264,9 @@ function buildRenderPlanNode(
     ...(node.cornerRadii === undefined ? {} : { cornerRadii: cornerRadiiFrom(node.cornerRadii) }),
     ...(node.effects === undefined ? {} : { effects: node.effects === null ? null : node.effects.map(effectFrom) }),
     ...(text === undefined ? {} : { text }),
+    ...(resource?.kind === 'placeholder'
+      ? { placeholder: { geometry: geometryFrom(node.relativeRect ?? node.rect), label: resource.label } }
+      : {}),
     ...(node.layoutMode === undefined ? {} : { layoutMode: node.layoutMode }),
     ...(node.itemSpacing === undefined ? {} : { itemSpacing: node.itemSpacing }),
     ...(node.gap === undefined ? {} : { gap: node.gap }),
@@ -224,7 +275,7 @@ function buildRenderPlanNode(
     ...(node.counterAxisAlign === undefined ? {} : { counterAxisAlign: node.counterAxisAlign }),
     ...(node.layoutGrow === undefined ? {} : { layoutGrow: node.layoutGrow }),
     ...(node.position === undefined ? {} : { position: node.position }),
-    children: node.children.map((child) => buildRenderPlanNode(child, styles, fontSubstitutions)),
+    children: node.children.map((child) => buildRenderPlanNode(child, styles, fontSubstitutions, resources)),
   }
 }
 
@@ -232,8 +283,10 @@ export function buildRenderPlan(
   node: FigmaNode,
   styles?: FigmaStyleCatalog,
   plannedFontUses: readonly PlannedFontUse[] = [],
+  plannedResources: readonly PlannedNonTypographyResource[] = [],
 ): RenderPlanNode {
   const fontSubstitutions = new Map(plannedFontUses.map((plannedFontUse) => [plannedFontUse.id, plannedFontUse.font]))
+  const resources = new Map(plannedResources.map((resource) => [resource.id, resource]))
 
-  return buildRenderPlanNode(node, styles, fontSubstitutions)
+  return buildRenderPlanNode(node, styles, fontSubstitutions, resources)
 }
