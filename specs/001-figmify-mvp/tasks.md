@@ -74,7 +74,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-04, RF-05.  
   **Hecho cuando:** las pruebas cubren página vacía, añadir, cancelar, contenido añadido durante la espera, separación de 100 px y alineación superior.
 
-- [ ] **19. Implementar el cálculo de límites visibles y destino.**  
+- [x] **19. Implementar el cálculo de límites visibles y destino.**  
   **RF:** RF-04, RF-05.  
   **Hecho cuando:** una página vacía devuelve `(0, 0)` y una página con contenido devuelve `(right + 100, top)` sin incluir la raíz temporal.
 
