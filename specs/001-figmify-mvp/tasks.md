@@ -62,7 +62,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01, RF-05, RF-06.  
   **Hecho cuando:** el cliente usa la base local, reenvía la URL sin validación semántica, propaga errores de API en inglés y admite cancelación.
 
-- [ ] **16. Escribir pruebas del cliente para error de API, error de red y respuesta no conforme.**  
+- [x] **16. Escribir pruebas del cliente para error de API, error de red y respuesta no conforme.**  
   **RF:** RF-01, RF-03, RF-05.  
   **Hecho cuando:** cada caso termina sin un documento de éxito y produce el mensaje en inglés definido por la spec.
 

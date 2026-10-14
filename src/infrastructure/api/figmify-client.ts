@@ -1,8 +1,18 @@
-import type { ApiError, FigmaDocument } from '../../contracts/api-v1'
+import { hasValidApiV1Document, type ApiError, type FigmaDocument } from '../../contracts/api-v1'
 
 export const figmifyApiBaseUrl = 'http://127.0.0.1:3000'
 
 export type FigmifyApiV1Response = FigmaDocument | ApiError
+
+const networkError: ApiError = {
+  code: 'NETWORK_ERROR',
+  message: 'Unable to reach Figmify API. Please try again.',
+}
+
+const incompatibleResponseError: ApiError = {
+  code: 'INCOMPATIBLE_RESPONSE',
+  message: 'The API response is not compatible with API v1.',
+}
 
 function isApiError(value: unknown): value is ApiError {
   return (
@@ -25,15 +35,28 @@ export async function requestFigmaDocument(
     includeHidden: 'false',
   }).toString()
 
-  const response = await fetchImplementation(requestUrl.toString(), {
-    method: 'GET',
-    signal,
-  })
-  const responseBody: unknown = await response.json()
+  let response: Response
+
+  try {
+    response = await fetchImplementation(requestUrl.toString(), {
+      method: 'GET',
+      signal,
+    })
+  } catch {
+    return networkError
+  }
+
+  let responseBody: unknown
+
+  try {
+    responseBody = await response.json()
+  } catch {
+    return incompatibleResponseError
+  }
 
   if (isApiError(responseBody)) {
     return responseBody
   }
 
-  return responseBody as FigmaDocument
+  return hasValidApiV1Document(responseBody) ? responseBody : incompatibleResponseError
 }
