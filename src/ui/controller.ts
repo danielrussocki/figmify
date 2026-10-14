@@ -1,4 +1,4 @@
-import type { ApplicationMessage, InterfaceMessage, RequestId } from '../contracts/messages'
+import type { ApplicationMessage, AvailableFont, FontReference, InterfaceMessage, RequestId } from '../contracts/messages'
 
 interface UiEvent {
   preventDefault(): void
@@ -25,6 +25,11 @@ interface UiWindow {
     type: 'message',
     listener: (event: { data: { pluginMessage?: ApplicationMessage } }) => void,
   ): void
+}
+
+interface PendingFontSubstitution {
+  sourceFont: FontReference
+  availableFonts: AvailableFont[]
 }
 
 export interface UiControllerOptions {
@@ -55,6 +60,13 @@ export function composeUiController(options: UiControllerOptions = createBrowser
         <button id="append-add" type="button">Add</button>
         <button id="append-cancel" type="button">Cancel</button>
       </section>
+      <section id="font-substitution" hidden aria-live="polite">
+        <p id="font-source"></p>
+        <label for="font-selection">Available font</label>
+        <select id="font-selection"></select>
+        <button id="font-confirm" type="button">Use selected font</button>
+        <button id="font-cancel" type="button">Use default font</button>
+      </section>
     </section>
   `
 
@@ -67,12 +79,19 @@ export function composeUiController(options: UiControllerOptions = createBrowser
   const progress = requiredElement(options.document, 'import-progress')
   const status = requiredElement(options.document, 'import-status')
   const cancelImportButton = requiredElement(options.document, 'cancel-import')
+  const fontSubstitution = requiredElement(options.document, 'font-substitution')
+  const fontSource = requiredElement(options.document, 'font-source')
+  const fontSelection = requiredElement(options.document, 'font-selection')
+  const fontConfirmButton = requiredElement(options.document, 'font-confirm')
+  const fontCancelButton = requiredElement(options.document, 'font-cancel')
   confirmation.hidden = true
   progress.hidden = false
   cancelImportButton.hidden = true
+  fontSubstitution.hidden = true
 
   let activeRequestId: RequestId | undefined
   let isProcessing = false
+  let pendingFontSubstitution: PendingFontSubstitution | undefined
 
   form.addEventListener('submit', (event) => {
     event.preventDefault()
@@ -83,6 +102,8 @@ export function composeUiController(options: UiControllerOptions = createBrowser
     const requestId = options.createRequestId()
     activeRequestId = requestId
     confirmation.hidden = true
+    fontSubstitution.hidden = true
+    pendingFontSubstitution = undefined
     status.textContent = ''
     postMessage(options.window, { type: 'IMPORT_REQUEST', requestId, url: urlInput.value })
   })
@@ -107,14 +128,63 @@ export function composeUiController(options: UiControllerOptions = createBrowser
     postMessage(options.window, { type: 'CANCEL_IMPORT', requestId: activeRequestId })
     activeRequestId = undefined
     isProcessing = false
+    pendingFontSubstitution = undefined
+    fontSubstitution.hidden = true
     setProcessingState(false, urlInput, submitButton, progress, cancelImportButton)
     status.textContent = 'Import cancelled.'
+  })
+
+  fontConfirmButton.addEventListener('click', (event) => {
+    event.preventDefault()
+    const selection = selectedFont(fontSelection.value, pendingFontSubstitution)
+    if (activeRequestId === undefined || pendingFontSubstitution === undefined || selection === undefined) {
+      return
+    }
+
+    postMessage(options.window, {
+      type: 'FONT_SUBSTITUTION_DECISION',
+      requestId: activeRequestId,
+      sourceFont: pendingFontSubstitution.sourceFont,
+      selection,
+    })
+    pendingFontSubstitution = undefined
+    fontSubstitution.hidden = true
+  })
+
+  fontCancelButton.addEventListener('click', (event) => {
+    event.preventDefault()
+    if (activeRequestId === undefined || pendingFontSubstitution === undefined) {
+      return
+    }
+
+    postMessage(options.window, {
+      type: 'FONT_SUBSTITUTION_DECISION',
+      requestId: activeRequestId,
+      sourceFont: pendingFontSubstitution.sourceFont,
+      selection: 'default',
+    })
+    pendingFontSubstitution = undefined
+    fontSubstitution.hidden = true
   })
 
   options.window.addEventListener('message', (event) => {
     const message = event.data.pluginMessage
     if (message?.type === 'CONFIRM_APPEND' && message.requestId === activeRequestId) {
       confirmation.hidden = false
+      return
+    }
+
+    if (message?.type === 'FONT_SUBSTITUTION_REQUIRED' && message.requestId === activeRequestId) {
+      pendingFontSubstitution = {
+        sourceFont: message.sourceFont,
+        availableFonts: message.availableFonts,
+      }
+      fontSource.textContent = `Select a replacement font for ${message.sourceFont.family} ${message.sourceFont.style}.`
+      fontSelection.innerHTML = message.availableFonts
+        .map((font, index) => `<option value="${index}">${escapeHtml(font.family)} ${escapeHtml(font.style)}</option>`)
+        .join('')
+      fontSelection.value = '0'
+      fontSubstitution.hidden = false
       return
     }
 
@@ -127,10 +197,30 @@ export function composeUiController(options: UiControllerOptions = createBrowser
       }
 
       isProcessing = false
+      pendingFontSubstitution = undefined
+      fontSubstitution.hidden = true
       setProcessingState(false, urlInput, submitButton, progress, cancelImportButton)
       status.textContent = message.status === 'success' ? 'Import completed.' : message.message
     }
   })
+}
+
+function selectedFont(value: string, pending: PendingFontSubstitution | undefined): AvailableFont | undefined {
+  if (pending === undefined) {
+    return undefined
+  }
+
+  const index = Number(value)
+  return Number.isInteger(index) ? pending.availableFonts[index] : undefined
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
 }
 
 function createBrowserOptions(): UiControllerOptions {

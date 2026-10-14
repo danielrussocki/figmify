@@ -86,7 +86,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-02, RF-05.  
   **Hecho cuando:** la interfaz bloquea envíos duplicados durante `processing`, permite cancelar y vuelve a aceptar solicitudes tras éxito, error o cancelación.
 
-- [ ] **22. Implementar la selección de fuente en la interfaz.**  
+- [x] **22. Implementar la selección de fuente en la interfaz.**  
   **RF:** RF-03.  
   **Hecho cuando:** para cada familia y estilo ausentes se muestra una única selección de fuentes disponibles y se emite `FONT_SUBSTITUTION_DECISION`.
 

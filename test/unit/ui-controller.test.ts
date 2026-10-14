@@ -73,6 +73,81 @@ describe('UI controller', () => {
     expect(fixture.root.innerHTML).not.toContain('fetch(')
   })
 
+  it('shows one font substitution selector for the active missing font and sends the selected font', () => {
+    const fixture = createFixture()
+    composeUiController(fixture.options)
+    fixture.urlInput.value = 'https://example.com'
+    fixture.form.dispatch('submit')
+
+    fixture.receive({
+      type: 'FONT_SUBSTITUTION_REQUIRED',
+      requestId: 'request-1',
+      sourceFont: { family: 'Missing Sans', style: 'Bold' },
+      availableFonts: [
+        { family: 'Inter', style: 'Regular' },
+        { family: 'Inter', style: 'Bold' },
+      ],
+    })
+
+    expect(fixture.fontSource.textContent).toBe('Select a replacement font for Missing Sans Bold.')
+    expect(fixture.fontSelection.innerHTML).toContain('Inter Regular')
+    expect(fixture.fontSelection.innerHTML).toContain('Inter Bold')
+    expect(fixture.fontSubstitution.hidden).toBe(false)
+
+    fixture.fontSelection.value = '1'
+    fixture.fontConfirmButton.dispatch('click')
+
+    expect(fixture.messages).toEqual([
+      { type: 'IMPORT_REQUEST', requestId: 'request-1', url: 'https://example.com' },
+      {
+        type: 'FONT_SUBSTITUTION_DECISION',
+        requestId: 'request-1',
+        sourceFont: { family: 'Missing Sans', style: 'Bold' },
+        selection: { family: 'Inter', style: 'Bold' },
+      },
+    ])
+    expect(fixture.fontSubstitution.hidden).toBe(true)
+  })
+
+  it('uses the Figma default font when the active font selector is cancelled', () => {
+    const fixture = createFixture()
+    composeUiController(fixture.options)
+    fixture.urlInput.value = 'https://example.com'
+    fixture.form.dispatch('submit')
+
+    fixture.receive({
+      type: 'FONT_SUBSTITUTION_REQUIRED',
+      requestId: 'request-1',
+      sourceFont: { family: 'Missing Sans', style: 'Bold' },
+      availableFonts: [{ family: 'Inter', style: 'Regular' }],
+    })
+    fixture.fontCancelButton.dispatch('click')
+
+    expect(fixture.messages).toContainEqual({
+      type: 'FONT_SUBSTITUTION_DECISION',
+      requestId: 'request-1',
+      sourceFont: { family: 'Missing Sans', style: 'Bold' },
+      selection: 'default',
+    })
+    expect(fixture.fontSubstitution.hidden).toBe(true)
+  })
+
+  it('does not show a font selector for another request', () => {
+    const fixture = createFixture()
+    composeUiController(fixture.options)
+    fixture.urlInput.value = 'https://example.com'
+    fixture.form.dispatch('submit')
+
+    fixture.receive({
+      type: 'FONT_SUBSTITUTION_REQUIRED',
+      requestId: 'another-request',
+      sourceFont: { family: 'Missing Sans', style: 'Bold' },
+      availableFonts: [{ family: 'Inter', style: 'Regular' }],
+    })
+
+    expect(fixture.fontSubstitution.hidden).toBe(true)
+  })
+
   it('blocks duplicate submissions while processing and lets the user cancel', () => {
     const fixture = createFixture()
     composeUiController(fixture.options)
@@ -139,6 +214,11 @@ function createFixture(): {
   addButton: FakeElement
   cancelButton: FakeElement
   cancelImportButton: FakeElement
+  fontSubstitution: FakeElement
+  fontSource: FakeElement
+  fontSelection: FakeElement
+  fontConfirmButton: FakeElement
+  fontCancelButton: FakeElement
   progress: FakeElement
   status: FakeElement
   submitButton: FakeElement
@@ -152,6 +232,11 @@ function createFixture(): {
   const addButton = new FakeElement()
   const cancelButton = new FakeElement()
   const cancelImportButton = new FakeElement()
+  const fontSubstitution = new FakeElement()
+  const fontSource = new FakeElement()
+  const fontSelection = new FakeElement()
+  const fontConfirmButton = new FakeElement()
+  const fontCancelButton = new FakeElement()
   const progress = new FakeElement()
   const status = new FakeElement()
   const submitButton = new FakeElement()
@@ -170,6 +255,11 @@ function createFixture(): {
             'append-add': addButton,
             'append-cancel': cancelButton,
             'cancel-import': cancelImportButton,
+            'font-substitution': fontSubstitution,
+            'font-source': fontSource,
+            'font-selection': fontSelection,
+            'font-confirm': fontConfirmButton,
+            'font-cancel': fontCancelButton,
             'import-progress': progress,
             'import-status': status,
             'import-submit': submitButton,
@@ -195,6 +285,11 @@ function createFixture(): {
     addButton,
     cancelButton,
     cancelImportButton,
+    fontSubstitution,
+    fontSource,
+    fontSelection,
+    fontConfirmButton,
+    fontCancelButton,
     progress,
     status,
     submitButton,
