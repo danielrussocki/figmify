@@ -90,7 +90,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03.  
   **Hecho cuando:** para cada familia y estilo ausentes se muestra una única selección de fuentes disponibles y se emite `FONT_SUBSTITUTION_DECISION`.
 
-- [ ] **23. Implementar el catálogo de fuentes de Figma y su carga.**  
+- [x] **23. Implementar el catálogo de fuentes de Figma y su carga.**  
   **RF:** RF-03.  
   **Hecho cuando:** el adaptador lista fuentes disponibles, detecta fuentes ausentes y carga la elegida o la fuente predeterminada de Figma antes de crear texto.
 
