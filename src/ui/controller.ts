@@ -5,8 +5,10 @@ interface UiEvent {
 }
 
 interface UiElement {
+  disabled: boolean
   hidden: boolean
   innerHTML: string
+  textContent: string
   value: string
   addEventListener(type: string, listener: (event: UiEvent) => void): void
 }
@@ -42,8 +44,12 @@ export function composeUiController(options: UiControllerOptions = createBrowser
       <form id="import-form">
         <label for="url-input">Website URL</label>
         <input id="url-input" name="url" type="text" required>
-        <button type="submit">Import</button>
+        <button id="import-submit" type="submit">Import</button>
       </form>
+      <section id="import-progress" hidden aria-live="polite">
+        <p id="import-status"></p>
+        <button id="cancel-import" type="button">Cancel import</button>
+      </section>
       <section id="append-confirmation" hidden aria-live="polite">
         <p>This page already contains content. Add the imported design?</p>
         <button id="append-add" type="button">Add</button>
@@ -54,18 +60,30 @@ export function composeUiController(options: UiControllerOptions = createBrowser
 
   const form = requiredElement(options.document, 'import-form')
   const urlInput = requiredElement(options.document, 'url-input')
+  const submitButton = requiredElement(options.document, 'import-submit')
   const confirmation = requiredElement(options.document, 'append-confirmation')
   const addButton = requiredElement(options.document, 'append-add')
   const cancelButton = requiredElement(options.document, 'append-cancel')
+  const progress = requiredElement(options.document, 'import-progress')
+  const status = requiredElement(options.document, 'import-status')
+  const cancelImportButton = requiredElement(options.document, 'cancel-import')
   confirmation.hidden = true
+  progress.hidden = false
+  cancelImportButton.hidden = true
 
   let activeRequestId: RequestId | undefined
+  let isProcessing = false
 
   form.addEventListener('submit', (event) => {
     event.preventDefault()
+    if (isProcessing) {
+      return
+    }
+
     const requestId = options.createRequestId()
     activeRequestId = requestId
     confirmation.hidden = true
+    status.textContent = ''
     postMessage(options.window, { type: 'IMPORT_REQUEST', requestId, url: urlInput.value })
   })
 
@@ -80,10 +98,37 @@ export function composeUiController(options: UiControllerOptions = createBrowser
     confirmation.hidden = true
   })
 
+  cancelImportButton.addEventListener('click', (event) => {
+    event.preventDefault()
+    if (!isProcessing || activeRequestId === undefined) {
+      return
+    }
+
+    postMessage(options.window, { type: 'CANCEL_IMPORT', requestId: activeRequestId })
+    activeRequestId = undefined
+    isProcessing = false
+    setProcessingState(false, urlInput, submitButton, progress, cancelImportButton)
+    status.textContent = 'Import cancelled.'
+  })
+
   options.window.addEventListener('message', (event) => {
     const message = event.data.pluginMessage
     if (message?.type === 'CONFIRM_APPEND' && message.requestId === activeRequestId) {
       confirmation.hidden = false
+      return
+    }
+
+    if (message?.type === 'IMPORT_STATUS' && message.requestId === activeRequestId) {
+      if (message.status === 'processing') {
+        isProcessing = true
+        setProcessingState(true, urlInput, submitButton, progress, cancelImportButton)
+        status.textContent = 'Importing design...'
+        return
+      }
+
+      isProcessing = false
+      setProcessingState(false, urlInput, submitButton, progress, cancelImportButton)
+      status.textContent = message.status === 'success' ? 'Import completed.' : message.message
     }
   })
 }
@@ -111,6 +156,19 @@ function requiredElement(uiDocument: UiDocument, id: string): UiElement {
 
 function postMessage(uiWindow: UiWindow, message: InterfaceMessage): void {
   uiWindow.parent.postMessage({ pluginMessage: message }, '*')
+}
+
+function setProcessingState(
+  isProcessing: boolean,
+  urlInput: UiElement,
+  submitButton: UiElement,
+  progress: UiElement,
+  cancelImportButton: UiElement,
+): void {
+  urlInput.disabled = isProcessing
+  submitButton.disabled = isProcessing
+  progress.hidden = false
+  cancelImportButton.hidden = !isProcessing
 }
 
 function sendAppendDecision(
