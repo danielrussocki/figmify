@@ -98,7 +98,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03.  
   **Hecho cuando:** las pruebas prueban una elección por familia/estilo, su aplicación a todos los usos y el uso de la fuente predeterminada al cancelar.
 
-- [ ] **25. Implementar el plan puro de sustituciones tipográficas.**  
+- [x] **25. Implementar el plan puro de sustituciones tipográficas.**  
   **RF:** RF-03.  
   **Hecho cuando:** el plan de renderizado asigna a cada uso de fuente ausente la selección única correspondiente o la fuente predeterminada.
 
