@@ -102,7 +102,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03.  
   **Hecho cuando:** el plan de renderizado asigna a cada uso de fuente ausente la selección única correspondiente o la fuente predeterminada.
 
-- [ ] **26. Escribir pruebas de resolución de imágenes, iconos y marcadores.**  
+- [x] **26. Escribir pruebas de resolución de imágenes, iconos y marcadores.**  
   **RF:** RF-03.  
   **Hecho cuando:** las pruebas cubren recurso resoluble, fallo de `createImageAsync`, marcador con misma geometría y etiqueta en inglés.
 
