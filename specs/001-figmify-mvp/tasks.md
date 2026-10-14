@@ -110,7 +110,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03.  
   **Hecho cuando:** imágenes e iconos se resuelven mediante `figma.createImageAsync(URL)` y los fallos se convierten en entradas de marcador sin abortar la importación.
 
-- [ ] **28. Escribir pruebas del plan de renderizado de jerarquía y geometría.**  
+- [x] **28. Escribir pruebas del plan de renderizado de jerarquía y geometría.**  
   **RF:** RF-03.  
   **Hecho cuando:** las pruebas verifican nodos `FRAME`, `TEXT` e `IMAGE`, hijos, coordenadas relativas, visibilidad y opacidad.
 
