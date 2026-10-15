@@ -178,7 +178,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01, RF-03, RF-05.  
   **Hecho cuando:** las pruebas verifican error de API, red, contrato inválido, página eliminada y fallo de creación con sus mensajes definidos.
 
-- [ ] **45. Implementar los caminos de error y reintento de la orquestación.**  
+- [x] **45. Implementar los caminos de error y reintento de la orquestación.**<br>
   **RF:** RF-01, RF-03, RF-05.  
   **Hecho cuando:** cada error termina la sesión sin mutaciones y la interfaz queda lista para solicitar otra importación.
 

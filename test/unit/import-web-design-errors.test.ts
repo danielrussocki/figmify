@@ -132,4 +132,38 @@ describe('import web design error orchestration', () => {
       )
     })
   })
+
+  it('finishes an errored session so a new import can be requested', async () => {
+    const messages: ApplicationMessage[] = []
+    const requestFigmaDocument = vi.fn()
+      .mockResolvedValueOnce({ schemaVersion: '2.0' })
+      .mockResolvedValueOnce(validDocument)
+    const application = createImportWebDesign({
+      postMessage: (message) => messages.push(message),
+      pageReader: {
+        readStartPage: () => ({ id: 'start-page', hasNodes: false }),
+        pageExists: () => true,
+      },
+      requestFigmaDocument,
+    })
+
+    application.handleMessage({ type: 'IMPORT_REQUEST', requestId: 'failed-request', url: 'https://example.com/' })
+
+    await vi.waitFor(() => {
+      expect(messages).toContainEqual(
+        errorMessage('failed-request', 'The API response is not compatible with API v1.'),
+      )
+    })
+
+    application.handleMessage({ type: 'IMPORT_REQUEST', requestId: 'retry-request', url: 'https://example.org/' })
+
+    await vi.waitFor(() => {
+      expect(requestFigmaDocument).toHaveBeenCalledTimes(2)
+      expect(messages).toContainEqual({
+        type: 'IMPORT_STATUS',
+        requestId: 'retry-request',
+        status: 'processing',
+      })
+    })
+  })
 })

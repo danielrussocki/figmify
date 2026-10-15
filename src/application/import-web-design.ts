@@ -1,4 +1,4 @@
-import { hasValidApiV1Document, type FigmaDocument, type FigmaRect } from '../contracts/api-v1'
+import { hasValidApiV1Document, type ApiError, type FigmaDocument, type FigmaRect } from '../contracts/api-v1'
 import type { ApplicationMessage, AvailableFont, FontReference, InterfaceMessage, RequestId } from '../contracts/messages'
 import { createFontSubstitutionPlan, groupFontUses, type FontSubstitutionChoice, type FontUse, type FontUseGroup } from '../domain/font-substitution'
 import { createImportStateMachine, type ImportStateMachine } from '../domain/import-session'
@@ -159,6 +159,7 @@ async function requestAndValidate(
   try {
     response = await dependencies.requestFigmaDocument(activeImport.url, activeImport.abortController.signal)
   } catch {
+    endWithError(activeImport, 'Unable to reach Figmify API. Please try again.', dependencies, stateMachine, getActiveImport)
     return
   }
 
@@ -166,7 +167,18 @@ async function requestAndValidate(
     return
   }
 
+  if (dependencies.pageReader.pageExists?.(activeImport.startPageId) === false) {
+    endWithError(activeImport, 'The import page is no longer available.', dependencies, stateMachine, getActiveImport)
+    return
+  }
+
+  if (isApiError(response)) {
+    endWithError(activeImport, response.message, dependencies, stateMachine, getActiveImport)
+    return
+  }
+
   if (!hasValidApiV1Document(response)) {
+    endWithError(activeImport, 'The API response is not compatible with API v1.', dependencies, stateMachine, getActiveImport)
     return
   }
 
@@ -177,7 +189,33 @@ async function requestAndValidate(
   })
 
   if (dependencies.fontCatalog !== undefined && dependencies.resourceLoader !== undefined && dependencies.renderer !== undefined) {
-    await startDocumentRendering(activeImport, dependencies, stateMachine, getActiveImport)
+    try {
+      await startDocumentRendering(activeImport, dependencies, stateMachine, getActiveImport)
+    } catch {
+      endWithError(activeImport, 'The design could not be created.', dependencies, stateMachine, getActiveImport)
+    }
+  }
+}
+
+function isApiError(value: unknown): value is ApiError {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    typeof (value as Record<string, unknown>).code === 'string' &&
+    typeof (value as Record<string, unknown>).message === 'string'
+  )
+}
+
+function endWithError(
+  active: ActiveImport,
+  message: string,
+  dependencies: ImportWebDesignDependencies,
+  stateMachine: ImportStateMachine,
+  getActiveImport: () => ActiveImport | undefined,
+): void {
+  if (getActiveImport()?.requestId === active.requestId && stateMachine.complete(active.requestId, 'error')) {
+    dependencies.postMessage({ type: 'IMPORT_STATUS', requestId: active.requestId, status: 'error', message })
   }
 }
 
@@ -315,6 +353,7 @@ async function renderDocument(
     await renderer.renderCompleteTree(buildRenderPlan(document.document, document.styles, plannedFonts, plannedResources), temporaryRoot)
   } catch {
     renderer.removeTemporaryRoot(temporaryRoot)
+    endWithError(active, 'The design could not be created.', dependencies, stateMachine, getActiveImport)
     return
   }
   if (!isActive(active, stateMachine, getActiveImport)) {
