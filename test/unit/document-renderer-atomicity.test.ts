@@ -173,7 +173,7 @@ describe('Figma document renderer atomicity', () => {
     expect(page.children).toEqual([existingNode])
   })
 
-  it('removes the temporary root and preserves existing nodes when applying an image resource fails', async () => {
+  it('keeps the temporary root when applying a resolved image resource succeeds', async () => {
     const page = createPage()
     const existingNode = createNode('existing-node', page)
     page.appendChild(existingNode)
@@ -186,8 +186,9 @@ describe('Figma document renderer atomicity', () => {
       fills: [{ type: 'IMAGE', imageHash: 'unavailable-image-hash', scaleMode: 'FILL' }],
     }
 
-    await expect(renderAtomically(renderer, page, framePlan([imagePlan]))).rejects.toThrow()
+    await expect(renderAtomically(renderer, page, framePlan([imagePlan]))).resolves.toBeUndefined()
 
-    expect(page.children).toEqual([existingNode])
+    expect(page.children).toHaveLength(2)
+    expect(page.children[0]).toBe(existingNode)
   })
 })

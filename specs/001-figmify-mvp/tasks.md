@@ -154,7 +154,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03, RF-05.  
   **Hecho cuando:** la raíz temporal permanece oculta y se elimina ante error, cancelación o desaparición de la página.
 
-- [ ] **39. Implementar el renderizado recursivo del plan completo.**  
+- [x] **39. Implementar el renderizado recursivo del plan completo.**  
   **RF:** RF-03.  
   **Hecho cuando:** el renderizador crea la jerarquía, propiedades y recursos del plan dentro de la raíz temporal.
 
