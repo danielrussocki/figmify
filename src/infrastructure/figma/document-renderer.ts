@@ -1,6 +1,7 @@
 import type { RenderPlanNode, RenderPlanPaint } from '../../domain/render-plan'
 
 export interface TemporaryRootNode {
+  readonly id?: string
   visible: boolean
   x: number
   y: number
@@ -25,7 +26,7 @@ interface RenderableNode extends TemporaryRootNode {
   bottomRightRadius?: number | typeof figma.mixed
   bottomLeftRadius?: number | typeof figma.mixed
   effects?: readonly Effect[] | typeof figma.mixed
-  layoutMode?: 'NONE' | 'HORIZONTAL' | 'VERTICAL'
+  layoutMode?: 'NONE' | 'HORIZONTAL' | 'VERTICAL' | 'GRID'
   itemSpacing?: number
   paddingTop?: number
   paddingRight?: number

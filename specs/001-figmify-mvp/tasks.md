@@ -166,11 +166,11 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01, RF-02, RF-03, RF-04, RF-06.  
   **Hecho cuando:** una respuesta v1 válida recorre solicitud, fuentes, recursos, renderizado, ubicación y estado final de éxito o advertencia.
 
-- [ ] **42. Implementar la orquestación desde solicitud hasta respuesta validada.**  
+- [x] **42. Implementar la orquestación desde solicitud hasta respuesta validada.**  
   **RF:** RF-01, RF-02, RF-05, RF-06.  
   **Hecho cuando:** el caso de uso conecta mensajes, sesión, confirmación inicial, cliente API y validación de respuesta.
 
-- [ ] **43. Integrar fuentes, recursos y renderizador en el caso de uso.**  
+- [x] **43. Integrar fuentes, recursos y renderizador en el caso de uso.**  
   **RF:** RF-03, RF-04.  
   **Hecho cuando:** una respuesta validada genera el selector de fuentes cuando corresponde y confirma el diseño renderizado en el destino correcto.
 
