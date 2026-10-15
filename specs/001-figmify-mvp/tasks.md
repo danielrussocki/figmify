@@ -182,7 +182,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01, RF-03, RF-05.  
   **Hecho cuando:** cada error termina la sesión sin mutaciones y la interfaz queda lista para solicitar otra importación.
 
-- [ ] **46. Escribir pruebas de carrera y ciclo de vida.**  
+- [x] **46. Escribir pruebas de carrera y ciclo de vida.**  
   **RF:** RF-02, RF-04, RF-05.  
   **Hecho cuando:** las pruebas cubren cancelación, cierre, respuesta tardía, cambio de página, eliminación de la página inicial y cambios de contenido durante la espera.
 
