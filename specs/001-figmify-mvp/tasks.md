@@ -146,7 +146,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03.  
   **Hecho cuando:** una imagen resuelta se asigna como pintura y una no resuelta se sustituye por el marcador definido.
 
-- [ ] **37. Escribir pruebas de atomicidad del renderizador de Figma.**  
+- [x] **37. Escribir pruebas de atomicidad del renderizador de Figma.**  
   **RF:** RF-03, RF-04, RF-05.  
   **Hecho cuando:** los fallos de nodo, fuente o recurso eliminan la raíz temporal y preservan todos los nodos previos.
 
