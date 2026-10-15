@@ -348,6 +348,10 @@ async function renderDocument(
       ? resource
       : { id: resource.id, kind: 'placeholder', label: resource.label },
   )
+  if (dependencies.pageReader.pageExists?.(active.startPageId) === false) {
+    endWithError(active, 'The import page is no longer available.', dependencies, stateMachine, getActiveImport)
+    return
+  }
   const temporaryRoot = renderer.createTemporaryRoot(active.startPageId)
   try {
     await renderer.renderCompleteTree(buildRenderPlan(document.document, document.styles, plannedFonts, plannedResources), temporaryRoot)
@@ -358,6 +362,11 @@ async function renderDocument(
   }
   if (!isActive(active, stateMachine, getActiveImport)) {
     renderer.removeTemporaryRoot(temporaryRoot)
+    return
+  }
+  if (dependencies.pageReader.pageExists?.(active.startPageId) === false) {
+    renderer.removeTemporaryRoot(temporaryRoot)
+    endWithError(active, 'The import page is no longer available.', dependencies, stateMachine, getActiveImport)
     return
   }
   const bounds = dependencies.pageReader.getVisibleContentBounds?.(active.startPageId, temporaryRoot)

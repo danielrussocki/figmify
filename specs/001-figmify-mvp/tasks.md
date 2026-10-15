@@ -186,7 +186,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-02, RF-04, RF-05.  
   **Hecho cuando:** las pruebas cubren cancelación, cierre, respuesta tardía, cambio de página, eliminación de la página inicial y cambios de contenido durante la espera.
 
-- [ ] **47. Implementar el descarte de resultados en carreras y cierres.**  
+- [x] **47. Implementar el descarte de resultados en carreras y cierres.**  
   **RF:** RF-02, RF-05.  
   **Hecho cuando:** ningún resultado tardío, cancelado o asociado a una página eliminada añade o modifica elementos.
 

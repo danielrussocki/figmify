@@ -39,6 +39,7 @@ function createFixture(options: {
   readonly pageExists?: () => boolean
   readonly getVisibleContentBounds?: ImportWebDesignDependencies['pageReader']['getVisibleContentBounds']
   readonly renderer?: ImportRenderer
+  readonly resourceLoader?: { resolve: ReturnType<typeof vi.fn> }
 }) {
   const messages: ApplicationMessage[] = []
   const requestFigmaDocument = vi.fn()
@@ -61,7 +62,7 @@ function createFixture(options: {
       isAvailable: vi.fn().mockResolvedValue(true),
       loadFont: vi.fn().mockResolvedValue({ family: 'Inter', style: 'Regular' }),
     },
-    resourceLoader: { resolve: vi.fn().mockResolvedValue([]) },
+    resourceLoader: options.resourceLoader ?? { resolve: vi.fn().mockResolvedValue([]) },
     renderer,
   })
 
@@ -161,6 +162,33 @@ describe('import web design lifecycle and races', () => {
       })
     })
     expect(fixture.renderer.createTemporaryRoot).not.toHaveBeenCalled()
+  })
+
+  it('discards a result when the start page disappears during resource resolution', async () => {
+    const resources = createDeferred<readonly []>()
+    let pageExists = true
+    const resourceLoader = { resolve: vi.fn().mockReturnValue(resources.promise) }
+    const fixture = createFixture({ pageExists: () => pageExists, resourceLoader })
+    fixture.requestFigmaDocument.mockResolvedValueOnce(validDocument)
+
+    fixture.application.handleMessage({ type: 'IMPORT_REQUEST', requestId: 'removed-during-render', url: 'https://example.com/' })
+
+    await vi.waitFor(() => {
+      expect(resourceLoader.resolve).toHaveBeenCalledOnce()
+    })
+    pageExists = false
+    resources.resolve([])
+
+    await vi.waitFor(() => {
+      expect(fixture.messages).toContainEqual({
+        type: 'IMPORT_STATUS',
+        requestId: 'removed-during-render',
+        status: 'error',
+        message: 'The import page is no longer available.',
+      })
+    })
+    expect(fixture.renderer.createTemporaryRoot).not.toHaveBeenCalled()
+    expect(fixture.renderer.confirmTemporaryRoot).not.toHaveBeenCalled()
   })
 
   it('uses content added during the wait to calculate the final destination', async () => {
