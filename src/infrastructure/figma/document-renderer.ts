@@ -49,6 +49,11 @@ export interface TemporaryRootPage {
   appendChild(node: TemporaryRootNode): void
 }
 
+export interface TemporaryRootDestination {
+  readonly x: number
+  readonly y: number
+}
+
 export interface DocumentRendererFigma {
   createFrame(): RenderableNode
   createText(): RenderableNode
@@ -59,6 +64,7 @@ export interface DocumentRendererFigma {
 export interface DocumentRenderer {
   createTemporaryRoot(page: TemporaryRootPage): TemporaryRootNode
   renderCompleteTree(plan: RenderPlanNode, temporaryRoot: TemporaryRootNode): Promise<void>
+  confirmTemporaryRoot(temporaryRoot: TemporaryRootNode, destination: TemporaryRootDestination): void
   removeTemporaryRoot(temporaryRoot: TemporaryRootNode): void
 }
 
@@ -206,6 +212,7 @@ async function applyText(plan: RenderPlanNode, node: RenderableNode, figma: Docu
 
 export function createDocumentRenderer(figma: DocumentRendererFigma): DocumentRenderer {
   const removedTemporaryRoots = new WeakSet<TemporaryRootNode>()
+  const renderedTemporaryRoots = new WeakSet<TemporaryRootNode>()
 
   async function renderNode(plan: RenderPlanNode, parent: TemporaryRootNode): Promise<void> {
     const node = plan.type === 'FRAME'
@@ -237,6 +244,16 @@ export function createDocumentRenderer(figma: DocumentRendererFigma): DocumentRe
     },
     async renderCompleteTree(plan: RenderPlanNode, temporaryRoot: TemporaryRootNode): Promise<void> {
       await renderNode(plan, temporaryRoot)
+      renderedTemporaryRoots.add(temporaryRoot)
+    },
+    confirmTemporaryRoot(temporaryRoot: TemporaryRootNode, destination: TemporaryRootDestination): void {
+      if (!renderedTemporaryRoots.has(temporaryRoot)) {
+        throw new Error('The temporary root has not completed rendering.')
+      }
+
+      temporaryRoot.x = destination.x
+      temporaryRoot.y = destination.y
+      temporaryRoot.visible = true
     },
     removeTemporaryRoot(temporaryRoot: TemporaryRootNode): void {
       if (removedTemporaryRoots.has(temporaryRoot)) {

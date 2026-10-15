@@ -158,11 +158,11 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03.  
   **Hecho cuando:** el renderizador crea la jerarquía, propiedades y recursos del plan dentro de la raíz temporal.
 
-- [ ] **40. Implementar la confirmación final y la visibilidad del diseño.**  
+- [x] **40. Implementar la confirmación final y la visibilidad del diseño.**  
   **RF:** RF-03, RF-04, RF-05.  
   **Hecho cuando:** el diseño se hace visible en la página de inicio y se mueve al destino calculado solo después de completar el renderizado.
 
-- [ ] **41. Escribir pruebas de orquestación de la ruta de éxito.**  
+- [x] **41. Escribir pruebas de orquestación de la ruta de éxito.**  
   **RF:** RF-01, RF-02, RF-03, RF-04, RF-06.  
   **Hecho cuando:** una respuesta v1 válida recorre solicitud, fuentes, recursos, renderizado, ubicación y estado final de éxito o advertencia.
 
