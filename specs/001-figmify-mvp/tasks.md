@@ -190,6 +190,6 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-02, RF-05.  
   **Hecho cuando:** ningún resultado tardío, cancelado o asociado a una página eliminada añade o modifica elementos.
 
-- [ ] **48. Ejecutar la verificación final de manifiesto, build, lint y suites.**  
+- [x] **48. Ejecutar la verificación final de manifiesto, build, lint y suites.**  
   **RF:** RF-01 a RF-06.  
   **Hecho cuando:** la verificación de manifiesto, build, lint, tests unitarios e integración HTTP local real finalizan correctamente.
