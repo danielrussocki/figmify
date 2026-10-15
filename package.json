@@ -4,7 +4,7 @@
   "description": "Your Figma Plugin",
   "main": "dist/code.js",
   "scripts": {
-    "build": "esbuild code.ts ui.ts --bundle --target=es2020 --outdir=dist --outbase=.",
+    "build": "node scripts/build.mjs",
     "test": "npm run test:unit && npm run test:integration",
     "test:build": "node --test test/build-output.test.mjs",
     "test:integration": "vitest run test/integration",

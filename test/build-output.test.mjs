@@ -12,12 +12,16 @@ test('build emits the controller and UI bundles', () => {
   assert.ok(existsSync(resolve(projectRoot, 'dist', 'ui.js')))
 })
 
-test('the plugin configuration loads bundles from dist', () => {
+test('the UI document embeds the UI bundle without a relative path', () => {
   const uiDocument = readFileSync(resolve(projectRoot, 'ui.html'), 'utf8')
   const manifest = JSON.parse(
     readFileSync(resolve(projectRoot, 'manifest.json'), 'utf8'),
   )
 
   assert.equal(manifest.main, 'dist/code.js')
-  assert.match(uiDocument, /<script src="dist\/ui\.js"><\/script>/)
+  assert.match(
+    uiDocument,
+    /<script(?![^>]*\bsrc\s*=)[^>]*>\s*\S[\s\S]*?<\/script>/i,
+  )
+  assert.doesNotMatch(uiDocument, /(?:\.\/)?dist\/ui\.js/)
 })

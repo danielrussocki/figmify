@@ -1,2 +1,196 @@
 <main id="figmify-ui"></main>
-<script src="dist/ui.js"></script>
+<script>"use strict";
+(() => {
+  // src/ui/controller.ts
+  function composeUiController(options = createBrowserOptions()) {
+    const root = requiredElement(options.document, "figmify-ui");
+    root.innerHTML = `
+    <section aria-labelledby="figmify-title">
+      <h1 id="figmify-title">Import web design</h1>
+      <form id="import-form">
+        <label for="url-input">Website URL</label>
+        <input id="url-input" name="url" type="text" required>
+        <button id="import-submit" type="submit">Import</button>
+      </form>
+      <section id="import-progress" hidden aria-live="polite">
+        <p id="import-status"></p>
+        <button id="cancel-import" type="button">Cancel import</button>
+      </section>
+      <section id="append-confirmation" hidden aria-live="polite">
+        <p>This page already contains content. Add the imported design?</p>
+        <button id="append-add" type="button">Add</button>
+        <button id="append-cancel" type="button">Cancel</button>
+      </section>
+      <section id="font-substitution" hidden aria-live="polite">
+        <p id="font-source"></p>
+        <label for="font-selection">Available font</label>
+        <select id="font-selection"></select>
+        <button id="font-confirm" type="button">Use selected font</button>
+        <button id="font-cancel" type="button">Use default font</button>
+      </section>
+    </section>
+  `;
+    const form = requiredElement(options.document, "import-form");
+    const urlInput = requiredElement(options.document, "url-input");
+    const submitButton = requiredElement(options.document, "import-submit");
+    const confirmation = requiredElement(options.document, "append-confirmation");
+    const addButton = requiredElement(options.document, "append-add");
+    const cancelButton = requiredElement(options.document, "append-cancel");
+    const progress = requiredElement(options.document, "import-progress");
+    const status = requiredElement(options.document, "import-status");
+    const cancelImportButton = requiredElement(options.document, "cancel-import");
+    const fontSubstitution = requiredElement(options.document, "font-substitution");
+    const fontSource = requiredElement(options.document, "font-source");
+    const fontSelection = requiredElement(options.document, "font-selection");
+    const fontConfirmButton = requiredElement(options.document, "font-confirm");
+    const fontCancelButton = requiredElement(options.document, "font-cancel");
+    confirmation.hidden = true;
+    progress.hidden = false;
+    cancelImportButton.hidden = true;
+    fontSubstitution.hidden = true;
+    let activeRequestId;
+    let isProcessing = false;
+    let pendingFontSubstitution;
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (isProcessing) {
+        return;
+      }
+      const requestId = options.createRequestId();
+      activeRequestId = requestId;
+      confirmation.hidden = true;
+      fontSubstitution.hidden = true;
+      pendingFontSubstitution = void 0;
+      status.textContent = "";
+      postMessage(options.window, { type: "IMPORT_REQUEST", requestId, url: urlInput.value });
+    });
+    addButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      sendAppendDecision(options.window, activeRequestId, "add");
+    });
+    cancelButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      sendAppendDecision(options.window, activeRequestId, "cancel");
+      confirmation.hidden = true;
+    });
+    cancelImportButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      if (!isProcessing || activeRequestId === void 0) {
+        return;
+      }
+      postMessage(options.window, { type: "CANCEL_IMPORT", requestId: activeRequestId });
+      activeRequestId = void 0;
+      isProcessing = false;
+      pendingFontSubstitution = void 0;
+      fontSubstitution.hidden = true;
+      setProcessingState(false, urlInput, submitButton, progress, cancelImportButton);
+      status.textContent = "Import cancelled.";
+    });
+    fontConfirmButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      const selection = selectedFont(fontSelection.value, pendingFontSubstitution);
+      if (activeRequestId === void 0 || pendingFontSubstitution === void 0 || selection === void 0) {
+        return;
+      }
+      postMessage(options.window, {
+        type: "FONT_SUBSTITUTION_DECISION",
+        requestId: activeRequestId,
+        sourceFont: pendingFontSubstitution.sourceFont,
+        selection
+      });
+      pendingFontSubstitution = void 0;
+      fontSubstitution.hidden = true;
+    });
+    fontCancelButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      if (activeRequestId === void 0 || pendingFontSubstitution === void 0) {
+        return;
+      }
+      postMessage(options.window, {
+        type: "FONT_SUBSTITUTION_DECISION",
+        requestId: activeRequestId,
+        sourceFont: pendingFontSubstitution.sourceFont,
+        selection: "default"
+      });
+      pendingFontSubstitution = void 0;
+      fontSubstitution.hidden = true;
+    });
+    options.window.addEventListener("message", (event) => {
+      const message = event.data.pluginMessage;
+      if (message?.type === "CONFIRM_APPEND" && message.requestId === activeRequestId) {
+        confirmation.hidden = false;
+        return;
+      }
+      if (message?.type === "FONT_SUBSTITUTION_REQUIRED" && message.requestId === activeRequestId) {
+        pendingFontSubstitution = {
+          sourceFont: message.sourceFont,
+          availableFonts: message.availableFonts
+        };
+        fontSource.textContent = `Select a replacement font for ${message.sourceFont.family} ${message.sourceFont.style}.`;
+        fontSelection.innerHTML = message.availableFonts.map((font, index) => `<option value="${index}">${escapeHtml(font.family)} ${escapeHtml(font.style)}</option>`).join("");
+        fontSelection.value = "0";
+        fontSubstitution.hidden = false;
+        return;
+      }
+      if (message?.type === "IMPORT_STATUS" && message.requestId === activeRequestId) {
+        if (message.status === "processing") {
+          isProcessing = true;
+          setProcessingState(true, urlInput, submitButton, progress, cancelImportButton);
+          status.textContent = "Importing design...";
+          return;
+        }
+        isProcessing = false;
+        pendingFontSubstitution = void 0;
+        fontSubstitution.hidden = true;
+        setProcessingState(false, urlInput, submitButton, progress, cancelImportButton);
+        status.textContent = message.status === "success" ? "Import completed." : message.message;
+      }
+    });
+  }
+  function selectedFont(value, pending) {
+    if (pending === void 0) {
+      return void 0;
+    }
+    const index = Number(value);
+    return Number.isInteger(index) ? pending.availableFonts[index] : void 0;
+  }
+  function escapeHtml(value) {
+    return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+  }
+  function createBrowserOptions() {
+    let nextRequestNumber = 0;
+    return {
+      document,
+      window,
+      createRequestId: () => {
+        nextRequestNumber += 1;
+        return `import-${nextRequestNumber}`;
+      }
+    };
+  }
+  function requiredElement(uiDocument, id) {
+    const element = uiDocument.getElementById(id);
+    if (element === null) {
+      throw new Error(`Required UI element not found: ${id}`);
+    }
+    return element;
+  }
+  function postMessage(uiWindow, message) {
+    uiWindow.parent.postMessage({ pluginMessage: message }, "*");
+  }
+  function setProcessingState(isProcessing, urlInput, submitButton, progress, cancelImportButton) {
+    urlInput.disabled = isProcessing;
+    submitButton.disabled = isProcessing;
+    progress.hidden = false;
+    cancelImportButton.hidden = !isProcessing;
+  }
+  function sendAppendDecision(uiWindow, requestId, decision) {
+    if (requestId !== void 0) {
+      postMessage(uiWindow, { type: "IMPORT_DECISION", requestId, decision });
+    }
+  }
+
+  // ui.ts
+  composeUiController();
+})();
+</script>

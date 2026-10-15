@@ -193,3 +193,15 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
 - [x] **48. Ejecutar la verificación final de manifiesto, build, lint y suites.**  
   **RF:** RF-01 a RF-06.  
   **Hecho cuando:** la verificación de manifiesto, build, lint, tests unitarios e integración HTTP local real finalizan correctamente.
+
+- [x] **49. Escribir una prueba de regresión para el documento autocontenido de la interfaz.**  
+  **RF:** RF-01, RF-02, RF-03, RF-04, RF-05.  
+  **Hecho cuando:** la prueba de build verifica que `ui.html` incorpora el bundle de la interfaz en un elemento `<script>` sin atributo `src` y no depende de rutas relativas a `dist/ui.js`.
+
+- [x] **50. Adaptar la compilación para generar una interfaz HTML con el bundle incrustado.**  
+  **RF:** RF-01, RF-02, RF-03, RF-04, RF-05.  
+  **Hecho cuando:** `npm run build` genera `dist/ui.js` y deja `ui.html` autocontenido con ese contenido incrustado, de modo que `figma.showUI(__html__)` ejecuta el controlador dentro del iframe de Figma.
+
+- [ ] **51. Verificar la carga de la interfaz empaquetada en Figma.**  
+  **RF:** RF-01, RF-02, RF-03, RF-04, RF-05.  
+  **Hecho cuando:** tras recargar el plugin compilado en Figma se ven el título, el campo de URL y el botón de importación; además, build, lint y todas las suites configuradas finalizan correctamente.
