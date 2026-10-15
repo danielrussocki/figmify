@@ -174,7 +174,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03, RF-04.  
   **Hecho cuando:** una respuesta validada genera el selector de fuentes cuando corresponde y confirma el diseño renderizado en el destino correcto.
 
-- [ ] **44. Escribir pruebas de errores de orquestación.**  
+- [x] **44. Escribir pruebas de errores de orquestación.**  
   **RF:** RF-01, RF-03, RF-05.  
   **Hecho cuando:** las pruebas verifican error de API, red, contrato inválido, página eliminada y fallo de creación con sus mensajes definidos.
 
