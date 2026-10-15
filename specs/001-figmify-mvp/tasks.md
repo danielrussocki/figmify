@@ -150,7 +150,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03, RF-04, RF-05.  
   **Hecho cuando:** los fallos de nodo, fuente o recurso eliminan la raíz temporal y preservan todos los nodos previos.
 
-- [ ] **38. Implementar la raíz temporal invisible y su limpieza.**  
+- [x] **38. Implementar la raíz temporal invisible y su limpieza.**  
   **RF:** RF-03, RF-05.  
   **Hecho cuando:** la raíz temporal permanece oculta y se elimina ante error, cancelación o desaparición de la página.
 

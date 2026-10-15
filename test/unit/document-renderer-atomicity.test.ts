@@ -6,6 +6,8 @@ interface FakeNode {
   readonly id: string
   removed: boolean
   visible: boolean
+  x: number
+  y: number
   children: FakeNode[]
   remove(): void
 }
@@ -35,6 +37,8 @@ function createNode(id: string, page: FakePage): FakeNode {
     id,
     removed: false,
     visible: true,
+    x: 0,
+    y: 0,
     children: [],
     remove(): void {
       node.removed = true
@@ -102,6 +106,33 @@ function framePlan(children: readonly RenderPlanNode[] = []): RenderPlanNode {
 }
 
 describe('Figma document renderer atomicity', () => {
+  it('creates a hidden temporary root outside the visible canvas', () => {
+    const page = createPage()
+    const renderer = rendererFor(createFigma(page))
+
+    const temporaryRoot = renderer.createTemporaryRoot(page)
+
+    expect(temporaryRoot.visible).toBe(false)
+    expect(temporaryRoot.x).toBe(-10000)
+    expect(temporaryRoot.y).toBe(-10000)
+    expect(page.children).toEqual([temporaryRoot])
+  })
+
+  it('removes the temporary root exactly once when an import is cancelled or its page disappears', () => {
+    const page = createPage()
+    const existingNode = createNode('existing-node', page)
+    page.appendChild(existingNode)
+    const renderer = rendererFor(createFigma(page))
+    const temporaryRoot = renderer.createTemporaryRoot(page)
+    const remove = vi.spyOn(temporaryRoot, 'remove')
+
+    renderer.removeTemporaryRoot(temporaryRoot)
+    renderer.removeTemporaryRoot(temporaryRoot)
+
+    expect(remove).toHaveBeenCalledTimes(1)
+    expect(page.children).toEqual([existingNode])
+  })
+
   it('removes the temporary root and preserves existing nodes when node creation fails', async () => {
     const page = createPage()
     const existingNode = createNode('existing-node', page)
