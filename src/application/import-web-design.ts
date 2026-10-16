@@ -51,7 +51,7 @@ export interface ValidatedImport {
 export interface ImportWebDesignDependencies {
   readonly postMessage: (message: ApplicationMessage) => void
   readonly pageReader: StartPageReader
-  readonly requestFigmaDocument: (url: string, signal: AbortSignal) => Promise<unknown>
+  readonly requestFigmaDocument: (url: string, signal: AbortSignal | undefined) => Promise<unknown>
   readonly onValidatedDocument?: (document: FigmaDocument, importContext: ValidatedImport) => void
   readonly fontCatalog?: ImportFontCatalog
   readonly resourceLoader?: ImportResourceLoader
@@ -66,7 +66,7 @@ interface ActiveImport {
   readonly requestId: RequestId
   readonly url: string
   readonly startPageId: string
-  readonly abortController: AbortController
+  readonly abortController?: AbortController
   document?: FigmaDocument
   availableFonts?: readonly AvailableFont[]
   pendingFontGroups?: readonly FontUseGroup[]
@@ -96,7 +96,7 @@ export function createImportWebDesign(dependencies: ImportWebDesignDependencies)
           requestId: message.requestId,
           url: message.url,
           startPageId: startPage.id,
-          abortController: new AbortController(),
+          abortController: createAbortController(),
           fontChoices: [],
           usedDefaultFont: false,
         }
@@ -141,7 +141,7 @@ export function createImportWebDesign(dependencies: ImportWebDesignDependencies)
 
       if (message.type === 'CANCEL_IMPORT' || message.type === 'CLOSE_PLUGIN') {
         if (stateMachine.cancel(message.requestId) && activeImport?.requestId === message.requestId) {
-          activeImport.abortController.abort()
+          activeImport.abortController?.abort()
           activeImport = undefined
         }
       }
@@ -157,7 +157,7 @@ async function requestAndValidate(
 ): Promise<void> {
   let response: unknown
   try {
-    response = await dependencies.requestFigmaDocument(activeImport.url, activeImport.abortController.signal)
+    response = await dependencies.requestFigmaDocument(activeImport.url, activeImport.abortController?.signal)
   } catch {
     endWithError(activeImport, 'Unable to reach Figmify API. Please try again.', dependencies, stateMachine, getActiveImport)
     return
@@ -195,6 +195,10 @@ async function requestAndValidate(
       endWithError(activeImport, 'The design could not be created.', dependencies, stateMachine, getActiveImport)
     }
   }
+}
+
+function createAbortController(): AbortController | undefined {
+  return typeof AbortController === 'undefined' ? undefined : new AbortController()
 }
 
 function isApiError(value: unknown): value is ApiError {

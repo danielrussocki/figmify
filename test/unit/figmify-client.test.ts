@@ -44,6 +44,20 @@ describe('Figmify API v1 client', () => {
     )
   })
 
+  it('does not send a signal when cancellation is unavailable', async () => {
+    const fetchImplementation = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(JSON.stringify(document), { status: 200 }),
+    )
+
+    await expect(requestFigmaDocument('https://example.com/', undefined, fetchImplementation)).resolves.toEqual(document)
+
+    expect(fetchImplementation).toHaveBeenCalledWith(
+      'http://127.0.0.1:3000/v1/figma?url=https%3A%2F%2Fexample.com%2F&includeHidden=false',
+      { method: 'GET' },
+    )
+    expect(Object.hasOwn(fetchImplementation.mock.calls[0]?.[1] ?? {}, 'signal')).toBe(false)
+  })
+
   it('returns the API error without a success document', async () => {
     const apiError = {
       code: 'INVALID_URL',

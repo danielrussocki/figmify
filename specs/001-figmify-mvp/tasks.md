@@ -202,6 +202,18 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01, RF-02, RF-03, RF-04, RF-05.  
   **Hecho cuando:** `npm run build` genera `dist/ui.js` y deja `ui.html` autocontenido con ese contenido incrustado, de modo que `figma.showUI(__html__)` ejecuta el controlador dentro del iframe de Figma.
 
-- [ ] **51. Verificar la carga de la interfaz empaquetada en Figma.**  
+- [x] **51. Verificar la carga de la interfaz empaquetada en Figma.**  
   **RF:** RF-01, RF-02, RF-03, RF-04, RF-05.  
   **Hecho cuando:** tras recargar el plugin compilado en Figma se ven el título, el campo de URL y el botón de importación; además, build, lint y todas las suites configuradas finalizan correctamente.
+
+- [x] **52. Escribir pruebas de regresión para la cancelación sin `AbortController` global.**  
+  **RF:** RF-02, RF-05.  
+  **Hecho cuando:** las pruebas simulan la ausencia de `AbortController`, verifican que una solicitud inicia sin lanzar `ReferenceError` y que la cancelación o el cierre descartan una respuesta tardía sin crear elementos.
+
+- [x] **53. Hacer compatible la cancelación de importaciones con el sandbox de Figma.**  
+  **RF:** RF-02, RF-05.  
+  **Hecho cuando:** el caso de uso detecta de forma segura si `AbortController` está disponible, usa su señal cuando exista y conserva el descarte lógico de resultados tardíos cuando no exista; el cliente HTTP no envía una señal ausente.
+
+- [x] **54. Verificar la regresión de cancelación en runtimes con y sin `AbortController`.**  
+  **RF:** RF-02, RF-05.  
+  **Hecho cuando:** las pruebas cubren ambos runtimes, `npm run build`, `npm run lint` y todas las suites configuradas finalizan correctamente, y una importación cancelada en Figma no muestra el error `AbortController is not defined` ni crea elementos tras una respuesta tardía.

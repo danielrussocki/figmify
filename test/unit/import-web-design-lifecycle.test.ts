@@ -70,6 +70,70 @@ function createFixture(options: {
 }
 
 describe('import web design lifecycle and races', () => {
+  it.each([
+    ['with AbortController', true],
+    ['without AbortController', false],
+  ])('does not create elements from a cancelled late response %s', async (_runtime, hasAbortController) => {
+    const response = createDeferred<FigmaDocument>()
+    const fixture = createFixture({})
+    fixture.requestFigmaDocument.mockReturnValueOnce(response.promise)
+
+    if (!hasAbortController) {
+      vi.stubGlobal('AbortController', undefined)
+    }
+
+    try {
+      expect(() => {
+        fixture.application.handleMessage({
+          type: 'IMPORT_REQUEST',
+          requestId: `cancelled-${hasAbortController ? 'with' : 'without'}-abort-controller`,
+          url: 'https://example.com/',
+        })
+      }).not.toThrow()
+
+      const requestId = `cancelled-${hasAbortController ? 'with' : 'without'}-abort-controller`
+      fixture.application.handleMessage({ type: 'CANCEL_IMPORT', requestId })
+      response.resolve(validDocument)
+
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(fixture.renderer.createTemporaryRoot).not.toHaveBeenCalled()
+      expect(fixture.renderer.confirmTemporaryRoot).not.toHaveBeenCalled()
+      expect(fixture.messages).not.toContainEqual({ type: 'IMPORT_STATUS', requestId, status: 'success' })
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it.each([
+    ['CANCEL_IMPORT', 'cancelled-without-abort-controller'],
+    ['CLOSE_PLUGIN', 'closed-without-abort-controller'],
+  ] as const)('starts without AbortController and discards a late response after %s', async (messageType, requestId) => {
+    const response = createDeferred<FigmaDocument>()
+    const fixture = createFixture({})
+    fixture.requestFigmaDocument.mockReturnValueOnce(response.promise)
+    vi.stubGlobal('AbortController', undefined)
+
+    try {
+      expect(() => {
+        fixture.application.handleMessage({ type: 'IMPORT_REQUEST', requestId, url: 'https://example.com/' })
+      }).not.toThrow()
+
+      expect(fixture.requestFigmaDocument).toHaveBeenCalledOnce()
+      fixture.application.handleMessage({ type: messageType, requestId })
+      response.resolve(validDocument)
+
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(fixture.renderer.createTemporaryRoot).not.toHaveBeenCalled()
+      expect(fixture.renderer.confirmTemporaryRoot).not.toHaveBeenCalled()
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
   it('aborts a cancelled request and discards its late response', async () => {
     const response = createDeferred<FigmaDocument>()
     const fixture = createFixture({})

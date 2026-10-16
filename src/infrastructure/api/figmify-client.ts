@@ -26,7 +26,7 @@ function isApiError(value: unknown): value is ApiError {
 
 export async function requestFigmaDocument(
   inputUrl: string,
-  signal: AbortSignal,
+  signal: AbortSignal | undefined,
   fetchImplementation: typeof fetch = fetch,
 ): Promise<FigmifyApiV1Response> {
   const requestUrl = new URL('/v1/figma', figmifyApiBaseUrl)
@@ -36,12 +36,13 @@ export async function requestFigmaDocument(
   }).toString()
 
   let response: Response
+  const requestOptions: { method: 'GET'; signal?: AbortSignal } = { method: 'GET' }
+  if (signal !== undefined) {
+    requestOptions.signal = signal
+  }
 
   try {
-    response = await fetchImplementation(requestUrl.toString(), {
-      method: 'GET',
-      signal,
-    })
+    response = await fetchImplementation(requestUrl.toString(), requestOptions)
   } catch {
     return networkError
   }

@@ -25,3 +25,11 @@ test('the UI document embeds the UI bundle without a relative path', () => {
   )
   assert.doesNotMatch(uiDocument, /(?:\.\/)?dist\/ui\.js/)
 })
+
+test('the packaged UI contains the import form visible in Figma', () => {
+  const uiDocument = readFileSync(resolve(projectRoot, 'ui.html'), 'utf8')
+
+  assert.match(uiDocument, /<h1 id="figmify-title">Import web design<\/h1>/)
+  assert.match(uiDocument, /<input id="url-input" name="url" type="text" required>/)
+  assert.match(uiDocument, /<button id="import-submit" type="submit">Import<\/button>/)
+})
