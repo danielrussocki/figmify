@@ -24,16 +24,18 @@ function isApiError(value: unknown): value is ApiError {
   )
 }
 
+function encodeQueryParameter(value: string): string {
+  return encodeURIComponent(value)
+    .replace(/%20/g, '+')
+    .replace(/[!'()~]/g, (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`)
+}
+
 export async function requestFigmaDocument(
   inputUrl: string,
   signal: AbortSignal | undefined,
   fetchImplementation: typeof fetch = fetch,
 ): Promise<FigmifyApiV1Response> {
-  const requestUrl = new URL('/v1/figma', figmifyApiBaseUrl)
-  requestUrl.search = new URLSearchParams({
-    url: inputUrl,
-    includeHidden: 'false',
-  }).toString()
+  const requestUrl = `${figmifyApiBaseUrl}/v1/figma?url=${encodeQueryParameter(inputUrl)}&includeHidden=false`
 
   let response: Response
   const requestOptions: { method: 'GET'; signal?: AbortSignal } = { method: 'GET' }
@@ -42,7 +44,7 @@ export async function requestFigmaDocument(
   }
 
   try {
-    response = await fetchImplementation(requestUrl.toString(), requestOptions)
+    response = await fetchImplementation(requestUrl, requestOptions)
   } catch {
     return networkError
   }

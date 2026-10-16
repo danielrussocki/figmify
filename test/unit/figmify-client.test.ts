@@ -58,6 +58,25 @@ describe('Figmify API v1 client', () => {
     expect(Object.hasOwn(fetchImplementation.mock.calls[0]?.[1] ?? {}, 'signal')).toBe(false)
   })
 
+  it('builds the request when the Figma sandbox does not provide URL globals', async () => {
+    const fetchImplementation = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(JSON.stringify(document), { status: 200 }),
+    )
+    vi.stubGlobal('URL', undefined)
+    vi.stubGlobal('URLSearchParams', undefined)
+
+    try {
+      await expect(requestFigmaDocument('not a URL?with=unescaped values', undefined, fetchImplementation)).resolves.toEqual(document)
+
+      expect(fetchImplementation).toHaveBeenCalledWith(
+        'http://localhost:3000/v1/figma?url=not+a+URL%3Fwith%3Dunescaped+values&includeHidden=false',
+        { method: 'GET' },
+      )
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
   it('returns the API error without a success document', async () => {
     const apiError = {
       code: 'INVALID_URL',
@@ -71,7 +90,8 @@ describe('Figmify API v1 client', () => {
   })
 
   it('returns the specified English message without a success document when the API cannot be reached', async () => {
-    const fetchImplementation = vi.fn<typeof fetch>().mockRejectedValue(new TypeError('Network request failed'))
+    const networkFailure = new TypeError('Network request failed')
+    const fetchImplementation = vi.fn<typeof fetch>().mockRejectedValue(networkFailure)
 
     const response = await requestFigmaDocument('https://example.com/', new AbortController().signal, fetchImplementation)
 

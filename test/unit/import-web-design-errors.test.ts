@@ -77,7 +77,8 @@ describe('import web design error orchestration', () => {
   })
 
   it('reports the defined network error message without creating a design', async () => {
-    const fixture = createFixture({ requestError: new Error('Network unavailable') })
+    const networkFailure = new Error('Network unavailable')
+    const fixture = createFixture({ requestError: networkFailure })
 
     startImport(fixture, 'network-error')
 
