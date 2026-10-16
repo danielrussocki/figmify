@@ -86,7 +86,10 @@ async function renderAtomically(
   page: FakePage,
   plan: RenderPlanNode,
 ): Promise<void> {
-  const temporaryRoot = renderer.createTemporaryRoot(page)
+  const temporaryRoot = renderer.createTemporaryRoot(page, {
+    width: plan.geometry.width,
+    height: plan.geometry.height,
+  })
 
   try {
     await renderer.renderCompleteTree(plan, temporaryRoot)
@@ -112,7 +115,7 @@ describe('Figma document renderer atomicity', () => {
     const page = createPage()
     const renderer = rendererFor(createFigma(page))
 
-    const temporaryRoot = renderer.createTemporaryRoot(page)
+    const temporaryRoot = renderer.createTemporaryRoot(page, { width: 320, height: 180 })
 
     expect(temporaryRoot.visible).toBe(false)
     expect(temporaryRoot.x).toBe(-10000)
@@ -125,7 +128,7 @@ describe('Figma document renderer atomicity', () => {
     const existingNode = createNode('existing-node', page)
     page.appendChild(existingNode)
     const renderer = rendererFor(createFigma(page))
-    const temporaryRoot = renderer.createTemporaryRoot(page)
+    const temporaryRoot = renderer.createTemporaryRoot(page, { width: 320, height: 180 })
     const remove = vi.spyOn(temporaryRoot, 'remove')
 
     renderer.removeTemporaryRoot(temporaryRoot)

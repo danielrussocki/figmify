@@ -242,6 +242,18 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-03, RF-05.
   **Hecho cuando:** el adaptador aplica modo, espaciado, relleno y alineación únicamente a `FRAME`, aplica crecimiento y posicionamiento únicamente cuando el padre usa Auto Layout, conserva el layout válido y no intenta añadir propiedades no admitidas a nodos Figma.
 
-- [ ] **61. Verificar la regresión de Auto Layout en Figma y las suites automatizadas.**
+- [x] **61. Verificar la regresión de Auto Layout en Figma y las suites automatizadas.**
   **RF:** RF-03, RF-05.
   **Hecho cuando:** una importación con marcos, texto e imágenes desde el plugin recargado en Figma finaliza sin `TypeError: object is not extensible`, conserva el layout esperado y `npm run build`, `npm run lint` y todas las suites configuradas finalizan correctamente.
+
+- [x] **62. Escribir pruebas de regresión para el tamaño de la raíz temporal de importación.**
+  **RF:** RF-03, RF-05.
+  **Hecho cuando:** las pruebas verifican que la raíz temporal se redimensiona con el ancho y alto de `document.rect` del nodo raíz de API v1, conserva su posición temporal y no usa el tamaño del viewport.
+
+- [x] **63. Dimensionar la raíz temporal con la geometría del documento importado.**
+  **RF:** RF-03, RF-05.
+  **Hecho cuando:** el caso de uso transmite la geometría del nodo `document` al adaptador de Figma y este aplica `resize(document.rect.width, document.rect.height)` a la raíz temporal antes de confirmar el diseño, sin alterar la geometría de los nodos renderizados.
+
+- [x] **64. Verificar la corrección del tamaño de la raíz temporal en Figma y las suites automatizadas.**
+  **RF:** RF-03, RF-05.
+  **Hecho cuando:** una importación desde el plugin recargado en Figma muestra una raíz temporal con las dimensiones completas del documento importado, sin un marco raíz de tamaño predeterminado, y `npm run build`, `npm run lint` y todas las suites configuradas finalizan correctamente.

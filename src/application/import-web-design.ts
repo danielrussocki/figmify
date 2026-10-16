@@ -26,8 +26,13 @@ export interface TemporaryRoot {
   readonly id?: string
 }
 
+export interface TemporaryRootGeometry {
+  readonly width: number
+  readonly height: number
+}
+
 export interface ImportRenderer {
-  createTemporaryRoot(pageId: string): TemporaryRoot
+  createTemporaryRoot(pageId: string, geometry: TemporaryRootGeometry): TemporaryRoot
   renderCompleteTree(plan: RenderPlanNode, temporaryRoot: TemporaryRoot): Promise<void>
   confirmTemporaryRoot(temporaryRoot: TemporaryRoot, destination: ImportDestination): void
   removeTemporaryRoot(temporaryRoot: TemporaryRoot): void
@@ -361,7 +366,10 @@ async function renderDocument(
     endWithError(active, 'The import page is no longer available.', dependencies, stateMachine, getActiveImport)
     return
   }
-  const temporaryRoot = renderer.createTemporaryRoot(active.startPageId)
+  const temporaryRoot = renderer.createTemporaryRoot(active.startPageId, {
+    width: document.document.rect.width,
+    height: document.document.rect.height,
+  })
   try {
     await renderer.renderCompleteTree(buildRenderPlan(document.document, document.styles, plannedFonts, plannedResources), temporaryRoot)
   } catch (error) {

@@ -5,6 +5,7 @@ export interface TemporaryRootNode {
   visible: boolean
   x: number
   y: number
+  resize(width: number, height: number): void
   appendChild?(node: TemporaryRootNode): void
   remove(): void
 }
@@ -54,6 +55,11 @@ export interface TemporaryRootDestination {
   readonly y: number
 }
 
+export interface TemporaryRootGeometry {
+  readonly width: number
+  readonly height: number
+}
+
 export interface DocumentRendererFigma {
   createFrame(): RenderableNode
   createText(): RenderableNode
@@ -62,7 +68,7 @@ export interface DocumentRendererFigma {
 }
 
 export interface DocumentRenderer {
-  createTemporaryRoot(page: TemporaryRootPage): TemporaryRootNode
+  createTemporaryRoot(page: TemporaryRootPage, geometry: TemporaryRootGeometry): TemporaryRootNode
   renderCompleteTree(plan: RenderPlanNode, temporaryRoot: TemporaryRootNode): Promise<void>
   confirmTemporaryRoot(temporaryRoot: TemporaryRootNode, destination: TemporaryRootDestination): void
   removeTemporaryRoot(temporaryRoot: TemporaryRootNode): void
@@ -244,11 +250,12 @@ export function createDocumentRenderer(figma: DocumentRendererFigma): DocumentRe
   }
 
   return {
-    createTemporaryRoot(page: TemporaryRootPage): TemporaryRootNode {
+    createTemporaryRoot(page: TemporaryRootPage, geometry: TemporaryRootGeometry): TemporaryRootNode {
       const temporaryRoot = figma.createFrame()
       temporaryRoot.visible = false
       temporaryRoot.x = STAGING_ROOT_COORDINATE
       temporaryRoot.y = STAGING_ROOT_COORDINATE
+      temporaryRoot.resize(geometry.width, geometry.height)
       page.appendChild(temporaryRoot)
 
       return temporaryRoot

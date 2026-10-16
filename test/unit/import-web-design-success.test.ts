@@ -15,6 +15,11 @@ interface TemporaryRoot {
   readonly id: string
 }
 
+interface TemporaryRootGeometry {
+  readonly width: number
+  readonly height: number
+}
+
 interface ImportWebDesignDependencies {
   readonly postMessage: (message: ApplicationMessage) => void
   readonly pageReader: {
@@ -32,7 +37,7 @@ interface ImportWebDesignDependencies {
     resolve(resources: readonly { readonly id: string; readonly kind: 'image' | 'icon'; readonly source: string; readonly rect: FigmaRect }[]): Promise<readonly NonTypographyResourceResult[]>
   }
   readonly renderer: {
-    createTemporaryRoot(pageId: string): TemporaryRoot
+    createTemporaryRoot(pageId: string, geometry: TemporaryRootGeometry): TemporaryRoot
     renderCompleteTree(plan: RenderPlanNode, temporaryRoot: TemporaryRoot): Promise<void>
     confirmTemporaryRoot(temporaryRoot: TemporaryRoot, destination: ImportDestination): void
     removeTemporaryRoot(temporaryRoot: TemporaryRoot): void
@@ -60,7 +65,7 @@ const validDocument: FigmaDocument = {
     id: 'root',
     tag: 'body',
     type: 'FRAME',
-    rect: { x: 0, y: 0, width: 1440, height: 900, top: 0, left: 0 },
+    rect: { x: 0, y: 0, width: 1280, height: 720, top: 0, left: 0 },
     isVisible: true,
     children: [
       {
@@ -182,6 +187,10 @@ describe('import web design successful orchestration', () => {
           rect: validDocument.document.children[1].rect,
         },
       ])
+      expect(fixture.renderer.createTemporaryRoot).toHaveBeenCalledWith('start-page', {
+        width: validDocument.document.rect.width,
+        height: validDocument.document.rect.height,
+      })
       expect(fixture.renderer.renderCompleteTree).toHaveBeenCalledOnce()
       expect(fixture.renderer.confirmTemporaryRoot).toHaveBeenCalledWith({ id: 'temporary-root' }, { x: 420, y: 40 })
       expect(fixture.messages).toContainEqual({ type: 'IMPORT_STATUS', requestId: 'request-1', status: 'success' })

@@ -16,12 +16,12 @@ const application = createImportWebDesign({
   fontCatalog: createFontCatalog(figma),
   resourceLoader: createResourceLoader(figma),
   renderer: {
-    createTemporaryRoot: (pageId) => {
+    createTemporaryRoot: (pageId, geometry) => {
       const page = figma.root.children.find((candidate) => candidate.id === pageId)
       if (page === undefined) {
         throw new Error('The import page is no longer available.')
       }
-      return documentRenderer.createTemporaryRoot(page as unknown as TemporaryRootPage)
+      return documentRenderer.createTemporaryRoot(page as unknown as TemporaryRootPage, geometry)
     },
     renderCompleteTree: (plan, temporaryRoot) => documentRenderer.renderCompleteTree(plan, temporaryRoot as TemporaryRootNode),
     confirmTemporaryRoot: (temporaryRoot, destination) => documentRenderer.confirmTemporaryRoot(temporaryRoot as TemporaryRootNode, destination),

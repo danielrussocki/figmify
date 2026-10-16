@@ -202,7 +202,7 @@ describe('import web design lifecycle and races', () => {
     response.resolve(validDocument)
 
     await vi.waitFor(() => {
-      expect(fixture.renderer.createTemporaryRoot).toHaveBeenCalledWith('start-page')
+      expect(fixture.renderer.createTemporaryRoot).toHaveBeenCalledWith('start-page', { width: 1440, height: 900 })
       expect(fixture.renderer.confirmTemporaryRoot).toHaveBeenCalled()
     })
   })

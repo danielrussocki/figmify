@@ -2,6 +2,18 @@ import { describe, expect, it, vi } from 'vitest'
 import { createDocumentRenderer } from '../../src/infrastructure/figma/document-renderer'
 import type { RenderPlanNode } from '../../src/domain/render-plan'
 
+interface TemporaryRootGeometry {
+  readonly width: number
+  readonly height: number
+}
+
+interface GeometryAwareDocumentRenderer {
+  createTemporaryRoot(
+    page: { appendChild(node: FakeNode): void },
+    geometry: TemporaryRootGeometry,
+  ): FakeNode
+}
+
 interface FakeNode {
   readonly kind: 'FRAME' | 'TEXT' | 'RECTANGLE'
   visible: boolean
@@ -450,7 +462,7 @@ describe('Figma document renderer complete tree', () => {
     }
     const renderer = createDocumentRenderer(figma)
     const page = { appendChild: vi.fn() }
-    const temporaryRoot = renderer.createTemporaryRoot(page)
+    const temporaryRoot = renderer.createTemporaryRoot(page, { width: 640, height: 480 })
 
     expect(temporaryRoot).toMatchObject({ visible: false, x: -10000, y: -10000 })
     expect(() => renderer.confirmTemporaryRoot(temporaryRoot, { x: 480, y: 96 })).toThrow(
@@ -461,5 +473,22 @@ describe('Figma document renderer complete tree', () => {
     renderer.confirmTemporaryRoot(temporaryRoot, { x: 480, y: 96 })
 
     expect(temporaryRoot).toMatchObject({ visible: true, x: 480, y: 96 })
+  })
+
+  it('resizes the temporary root to the imported document dimensions without moving it', () => {
+    const figma = {
+      createFrame: vi.fn(() => createReadOnlyGeometryNode('FRAME')),
+      createText: vi.fn(() => createNode('TEXT')),
+      createRectangle: vi.fn(() => createNode('RECTANGLE')),
+      loadFontAsync: vi.fn().mockResolvedValue(undefined),
+    }
+    const renderer = createDocumentRenderer(figma) as unknown as GeometryAwareDocumentRenderer
+    const page = { appendChild: vi.fn() }
+    const documentGeometry = { width: 1280, height: 720 }
+
+    const temporaryRoot = renderer.createTemporaryRoot(page, documentGeometry)
+
+    expect(temporaryRoot.resize).toHaveBeenCalledWith(1280, 720)
+    expect(temporaryRoot).toMatchObject({ x: -10000, y: -10000 })
   })
 })
