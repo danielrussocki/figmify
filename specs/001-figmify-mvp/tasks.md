@@ -269,3 +269,15 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
 - [x] **67. Verificar la regresión de SVG inline en Figma y las suites automatizadas.**
   **RF:** RF-03, RF-05.
   **Hecho cuando:** una importación desde el plugin recargado en Figma que contiene un SVG inline con un `path` muestra el vector en la posición y tamaño esperados, sin marcos vacíos adicionales, y `npm run build`, `npm run lint` y todas las suites configuradas finalizan correctamente.
+
+- [ ] **68. Escribir pruebas de regresión para conservar tags HTML como nombres de nodos.**
+  **RF:** RF-03, RF-05.
+  **Hecho cuando:** las pruebas verifican que el plan conserva el tag de cada nodo v1 y que el renderizador asigna ese valor como nombre de los marcos, textos, imágenes y SVG creados, sin alterar su jerarquía ni sus propiedades visuales.
+
+- [ ] **69. Conservar y asignar los tags HTML como nombres de nodos de Figma.**
+  **RF:** RF-03.
+  **Hecho cuando:** el plan de renderizado transporta el campo `tag` validado y el adaptador de Figma lo asigna al nombre del nodo correspondiente, de modo que la estructura importada se identifica mediante nombres como `html`, `body` y los tags de sus descendientes.
+
+- [ ] **70. Verificar la conservación de tags HTML en Figma y las suites automatizadas.**
+  **RF:** RF-03, RF-05.
+  **Hecho cuando:** una importación desde el plugin recargado en Figma muestra los tags de la respuesta API v1 como nombres de sus nodos editables, conserva la jerarquía esperada y `npm run build`, `npm run lint` y todas las suites configuradas finalizan correctamente.

@@ -30,6 +30,7 @@ La API v1 garantiza que cada respuesta de éxito contiene elementos y propiedade
 ### RF-03 — Creación fiel del diseño
 - **Criterio de aceptación (EARS):** Cuando el servicio devuelva una respuesta de éxito conforme al contrato de API v1, el sistema deberá crear en la página de inicio de la importación todos los elementos y propiedades descritos como elementos editables de Figma.
 - **Criterio de aceptación (EARS):** El sistema deberá conservar la estructura, los estilos y los comportamientos descritos por la respuesta de API v1, con la máxima fidelidad permitida por Figma.
+- **Criterio de aceptación (EARS):** Cuando un nodo de la respuesta de API v1 incluya un tag HTML, el sistema deberá conservarlo como nombre del nodo editable correspondiente en Figma para hacer identificable su estructura.
 - **Criterio de aceptación (EARS):** Si un recurso externo que no sea una tipografía, como una imagen o un icono, no está disponible, el sistema deberá sustituirlo por un marcador editable que conserve su posición y espacio, e incluya una etiqueta en inglés que identifique el recurso no disponible.
 - **Criterio de aceptación (EARS):** Si una tipografía descrita por la respuesta no está disponible en Figma, el sistema deberá mostrar un selector con las fuentes disponibles para que la persona usuaria elija una sustituta.
 - **Criterio de aceptación (EARS):** Cuando la persona usuaria elija una sustituta para una familia y estilo de fuente ausentes, el sistema deberá aplicarla a todos los usos de esa fuente dentro de la importación.
