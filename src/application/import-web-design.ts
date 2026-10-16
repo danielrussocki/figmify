@@ -191,7 +191,12 @@ async function requestAndValidate(
   if (dependencies.fontCatalog !== undefined && dependencies.resourceLoader !== undefined && dependencies.renderer !== undefined) {
     try {
       await startDocumentRendering(activeImport, dependencies, stateMachine, getActiveImport)
-    } catch {
+    } catch (error) {
+      console.error('[Figmify] Design creation failed before rendering.', {
+        requestId: activeImport.requestId,
+        startPageId: activeImport.startPageId,
+        error,
+      })
       endWithError(activeImport, 'The design could not be created.', dependencies, stateMachine, getActiveImport)
     }
   }
@@ -359,7 +364,13 @@ async function renderDocument(
   const temporaryRoot = renderer.createTemporaryRoot(active.startPageId)
   try {
     await renderer.renderCompleteTree(buildRenderPlan(document.document, document.styles, plannedFonts, plannedResources), temporaryRoot)
-  } catch {
+  } catch (error) {
+    console.error('[Figmify] Design creation failed while rendering the document.', {
+      requestId: active.requestId,
+      startPageId: active.startPageId,
+      temporaryRootId: temporaryRoot.id,
+      error,
+    })
     renderer.removeTemporaryRoot(temporaryRoot)
     endWithError(active, 'The design could not be created.', dependencies, stateMachine, getActiveImport)
     return

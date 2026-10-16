@@ -221,3 +221,27 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
 - [x] **55. Unificar y verificar el origen local de la API en el cliente y el manifiesto.**
   **RF:** RF-01, RF-05, RF-06.
   **Hecho cuando:** `figmifyApiBaseUrl` y `devAllowedDomains` declaran el mismo origen local, una prueba de regresión verifica esa coherencia y una solicitud desde el plugin recargado en Figma alcanza la API local sin mostrar `Unable to reach Figmify API. Please try again.`.
+
+- [x] **56. Escribir pruebas de regresión para el redimensionado de nodos del renderizador.**
+  **RF:** RF-03, RF-05.
+  **Hecho cuando:** las pruebas verifican que el renderizador redimensiona nodos `FRAME`, `TEXT` e `IMAGE` mediante su método de redimensionado y no intenta escribir directamente las propiedades de solo lectura `width` ni `height`.
+
+- [x] **57. Corregir la aplicación de geometría para usar el método de redimensionado de Figma.**
+  **RF:** RF-03, RF-05.
+  **Hecho cuando:** el adaptador del renderizador aplica ancho y alto mediante `resize(width, height)`, conserva la posición, visibilidad y opacidad, y una respuesta API v1 válida no produce `TypeError: no setter for property`.
+
+- [x] **58. Verificar la corrección de redimensionado en Figma y las suites automatizadas.**
+  **RF:** RF-03, RF-05.
+  **Hecho cuando:** una importación desde el plugin recargado en Figma crea el diseño sin el error de setter, y `npm run build`, `npm run lint` y todas las suites configuradas finalizan correctamente.
+
+- [x] **59. Escribir pruebas de regresión para las capacidades de Auto Layout de nodos Figma no extensibles.**
+  **RF:** RF-03, RF-05.
+  **Hecho cuando:** las pruebas usan nodos sellados que representan `FRAME`, `TEXT` e `IMAGE`, verifican que las propiedades de contenedor Auto Layout solo se escriben en marcos y que las propiedades de hijo solo se aplican bajo un padre Auto Layout.
+
+- [x] **60. Corregir la aplicación contextual de Auto Layout en el renderizador de Figma.**
+  **RF:** RF-03, RF-05.
+  **Hecho cuando:** el adaptador aplica modo, espaciado, relleno y alineación únicamente a `FRAME`, aplica crecimiento y posicionamiento únicamente cuando el padre usa Auto Layout, conserva el layout válido y no intenta añadir propiedades no admitidas a nodos Figma.
+
+- [ ] **61. Verificar la regresión de Auto Layout en Figma y las suites automatizadas.**
+  **RF:** RF-03, RF-05.
+  **Hecho cuando:** una importación con marcos, texto e imágenes desde el plugin recargado en Figma finaliza sin `TypeError: object is not extensible`, conserva el layout esperado y `npm run build`, `npm run lint` y todas las suites configuradas finalizan correctamente.

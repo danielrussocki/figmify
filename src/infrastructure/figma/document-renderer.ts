@@ -10,8 +10,7 @@ export interface TemporaryRootNode {
 }
 
 interface RenderableNode extends TemporaryRootNode {
-  width?: number
-  height?: number
+  resize(width: number, height: number): void
   opacity?: number
   fills?: readonly Paint[] | typeof figma.mixed
   strokes?: readonly Paint[] | typeof figma.mixed
@@ -111,8 +110,7 @@ function effectFrom(effect: NonNullable<RenderPlanNode['effects']>[number]): Eff
 function applyGeometryAndAppearance(plan: RenderPlanNode, node: RenderableNode): void {
   node.x = plan.geometry.x
   node.y = plan.geometry.y
-  node.width = plan.geometry.width
-  node.height = plan.geometry.height
+  node.resize(plan.geometry.width, plan.geometry.height)
   node.visible = plan.isVisible
   node.opacity = plan.opacity
 
@@ -155,30 +153,35 @@ function applyGeometryAndAppearance(plan: RenderPlanNode, node: RenderableNode):
   }
 }
 
-function applyAutoLayout(plan: RenderPlanNode, node: RenderableNode): void {
-  if (plan.layoutMode !== undefined) {
-    node.layoutMode = plan.layoutMode
+function applyAutoLayout(plan: RenderPlanNode, node: RenderableNode, parentUsesAutoLayout: boolean): void {
+  if (plan.type === 'FRAME') {
+    if (plan.layoutMode !== undefined) {
+      node.layoutMode = plan.layoutMode
+    }
+    if (plan.itemSpacing !== undefined) {
+      node.itemSpacing = plan.itemSpacing
+    }
+    if (plan.padding !== undefined) {
+      node.paddingTop = plan.padding.top
+      node.paddingRight = plan.padding.right
+      node.paddingBottom = plan.padding.bottom
+      node.paddingLeft = plan.padding.left
+    }
+    if (plan.primaryAxisAlign !== undefined) {
+      node.primaryAxisAlignItems = plan.primaryAxisAlign
+    }
+    if (plan.counterAxisAlign !== undefined) {
+      node.counterAxisAlignItems = plan.counterAxisAlign
+    }
   }
-  if (plan.itemSpacing !== undefined) {
-    node.itemSpacing = plan.itemSpacing
-  }
-  if (plan.padding !== undefined) {
-    node.paddingTop = plan.padding.top
-    node.paddingRight = plan.padding.right
-    node.paddingBottom = plan.padding.bottom
-    node.paddingLeft = plan.padding.left
-  }
-  if (plan.primaryAxisAlign !== undefined) {
-    node.primaryAxisAlignItems = plan.primaryAxisAlign
-  }
-  if (plan.counterAxisAlign !== undefined) {
-    node.counterAxisAlignItems = plan.counterAxisAlign
-  }
-  if (plan.layoutGrow !== undefined) {
-    node.layoutGrow = plan.layoutGrow
-  }
-  if (plan.position !== undefined) {
-    node.layoutPositioning = plan.position === 'absolute' ? 'ABSOLUTE' : 'AUTO'
+
+  if (parentUsesAutoLayout) {
+    if (plan.layoutGrow !== undefined) {
+      node.layoutGrow = plan.layoutGrow
+    }
+    if (plan.position !== undefined) {
+      node.layoutPositioning = plan.position === 'absolute' ? 'ABSOLUTE' : 'AUTO'
+    }
   }
 }
 
@@ -215,7 +218,11 @@ export function createDocumentRenderer(figma: DocumentRendererFigma): DocumentRe
   const removedTemporaryRoots = new WeakSet<TemporaryRootNode>()
   const renderedTemporaryRoots = new WeakSet<TemporaryRootNode>()
 
-  async function renderNode(plan: RenderPlanNode, parent: TemporaryRootNode): Promise<void> {
+  async function renderNode(
+    plan: RenderPlanNode,
+    parent: TemporaryRootNode,
+    parentUsesAutoLayout: boolean,
+  ): Promise<void> {
     const node = plan.type === 'FRAME'
       ? figma.createFrame()
       : plan.type === 'TEXT'
@@ -225,11 +232,14 @@ export function createDocumentRenderer(figma: DocumentRendererFigma): DocumentRe
     parent.appendChild?.(node)
 
     applyGeometryAndAppearance(plan, node)
-    applyAutoLayout(plan, node)
+    applyAutoLayout(plan, node, parentUsesAutoLayout)
     await applyText(plan, node, figma)
 
+    const nodeUsesAutoLayout = plan.type === 'FRAME'
+      && plan.layoutMode !== undefined
+      && plan.layoutMode !== 'NONE'
     for (const child of plan.children) {
-      await renderNode(child, node)
+      await renderNode(child, node, nodeUsesAutoLayout)
     }
   }
 
@@ -244,7 +254,7 @@ export function createDocumentRenderer(figma: DocumentRendererFigma): DocumentRe
       return temporaryRoot
     },
     async renderCompleteTree(plan: RenderPlanNode, temporaryRoot: TemporaryRootNode): Promise<void> {
-      await renderNode(plan, temporaryRoot)
+      await renderNode(plan, temporaryRoot, false)
       renderedTemporaryRoots.add(temporaryRoot)
     },
     confirmTemporaryRoot(temporaryRoot: TemporaryRootNode, destination: TemporaryRootDestination): void {

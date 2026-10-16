@@ -114,6 +114,7 @@ describe('import web design error orchestration', () => {
   })
 
   it('removes the temporary root and reports a creation failure', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
     const temporaryRoot = { id: 'temporary-root' }
     const renderer: ImportRenderer = {
       createTemporaryRoot: vi.fn(() => temporaryRoot),
@@ -125,13 +126,27 @@ describe('import web design error orchestration', () => {
 
     startImport(fixture, 'creation-error')
 
-    await vi.waitFor(() => {
-      expect(renderer.removeTemporaryRoot).toHaveBeenCalledWith(temporaryRoot)
-      expect(renderer.confirmTemporaryRoot).not.toHaveBeenCalled()
-      expect(fixture.messages).toContainEqual(
-        errorMessage('creation-error', 'The design could not be created.'),
+    try {
+      await vi.waitFor(() => {
+        expect(renderer.removeTemporaryRoot).toHaveBeenCalledWith(temporaryRoot)
+        expect(renderer.confirmTemporaryRoot).not.toHaveBeenCalled()
+        expect(fixture.messages).toContainEqual(
+          errorMessage('creation-error', 'The design could not be created.'),
+        )
+      })
+
+      expect(consoleError).toHaveBeenCalledWith(
+        '[Figmify] Design creation failed while rendering the document.',
+        expect.objectContaining({
+          requestId: 'creation-error',
+          startPageId: 'start-page',
+          temporaryRootId: 'temporary-root',
+          error: expect.any(Error),
+        }),
       )
-    })
+    } finally {
+      consoleError.mockRestore()
+    }
   })
 
   it('finishes an errored session so a new import can be requested', async () => {

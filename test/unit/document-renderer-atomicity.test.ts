@@ -9,6 +9,7 @@ interface FakeNode {
   x: number
   y: number
   children: FakeNode[]
+  resize(width: number, height: number): void
   remove(): void
 }
 
@@ -40,6 +41,7 @@ function createNode(id: string, page: FakePage): FakeNode {
     x: 0,
     y: 0,
     children: [],
+    resize(): void {},
     remove(): void {
       node.removed = true
       const index = page.children.indexOf(node)

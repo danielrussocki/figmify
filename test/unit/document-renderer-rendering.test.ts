@@ -42,8 +42,13 @@ interface FakeNode {
   letterSpacing?: unknown
   textAlignHorizontal?: string
   textAutoResize?: string
+  resize(width: number, height: number): void
   appendChild(node: FakeNode): void
   remove(): void
+}
+
+interface ReadOnlyGeometryNode extends FakeNode {
+  resize(width: number, height: number): void
 }
 
 function createNode(kind: FakeNode['kind']): FakeNode {
@@ -53,11 +58,67 @@ function createNode(kind: FakeNode['kind']): FakeNode {
     x: 0,
     y: 0,
     children: [],
+    resize(width: number, height: number): void {
+      this.width = width
+      this.height = height
+    },
     appendChild(node: FakeNode): void {
       this.children.push(node)
     },
     remove: vi.fn(),
   }
+}
+
+function createReadOnlyGeometryNode(kind: FakeNode['kind']): ReadOnlyGeometryNode {
+  const node = createNode(kind) as ReadOnlyGeometryNode
+  let width = 0
+  let height = 0
+
+  Object.defineProperties(node, {
+    width: {
+      enumerable: true,
+      get: (): number => width,
+    },
+    height: {
+      enumerable: true,
+      get: (): number => height,
+    },
+  })
+  node.resize = vi.fn((nextWidth: number, nextHeight: number): void => {
+    width = nextWidth
+    height = nextHeight
+  })
+
+  return node
+}
+
+function createSealedAutoLayoutNode(
+  kind: FakeNode['kind'],
+  capabilities: { readonly container: boolean; readonly child: boolean },
+): FakeNode {
+  const node: FakeNode = { ...createNode(kind), width: 0, height: 0, opacity: 1 }
+
+  if (capabilities.container) {
+    Object.assign(node, {
+      layoutMode: 'NONE',
+      itemSpacing: 0,
+      paddingTop: 0,
+      paddingRight: 0,
+      paddingBottom: 0,
+      paddingLeft: 0,
+      primaryAxisAlignItems: 'MIN',
+      counterAxisAlignItems: 'MIN',
+    })
+  }
+
+  if (capabilities.child) {
+    Object.assign(node, {
+      layoutGrow: 0,
+      layoutPositioning: 'AUTO',
+    })
+  }
+
+  return Object.seal(node)
 }
 
 function completePlan(): RenderPlanNode {
@@ -113,7 +174,106 @@ function completePlan(): RenderPlanNode {
   }
 }
 
+function autoLayoutRegressionPlan(
+  parentUsesAutoLayout: boolean,
+  childrenHaveContainerProperties: boolean,
+): RenderPlanNode {
+  const children: readonly RenderPlanNode[] = [
+    {
+      id: 'headline',
+      type: 'TEXT',
+      geometry: { x: 20, y: 30, width: 200, height: 40 },
+      isVisible: true,
+      opacity: 1,
+      ...(childrenHaveContainerProperties
+        ? {
+            layoutMode: 'HORIZONTAL' as const,
+            itemSpacing: 12,
+            padding: { top: 1, right: 2, bottom: 3, left: 4 },
+            primaryAxisAlign: 'CENTER' as const,
+            counterAxisAlign: 'MAX' as const,
+          }
+        : {}),
+      layoutGrow: 1,
+      position: 'absolute',
+      children: [],
+    },
+    {
+      id: 'hero-image',
+      type: 'IMAGE',
+      geometry: { x: 20, y: 90, width: 300, height: 180 },
+      isVisible: true,
+      opacity: 1,
+      ...(childrenHaveContainerProperties
+        ? {
+            layoutMode: 'HORIZONTAL' as const,
+            itemSpacing: 12,
+            padding: { top: 1, right: 2, bottom: 3, left: 4 },
+            primaryAxisAlign: 'CENTER' as const,
+            counterAxisAlign: 'MAX' as const,
+          }
+        : {}),
+      layoutGrow: 1,
+      position: 'absolute',
+      children: [],
+    },
+  ]
+
+  return {
+    id: 'design',
+    type: 'FRAME',
+    geometry: { x: 12, y: 24, width: 640, height: 480 },
+    isVisible: true,
+    opacity: 1,
+    ...(parentUsesAutoLayout
+      ? {
+          layoutMode: 'VERTICAL' as const,
+          itemSpacing: 16,
+          padding: { top: 5, right: 6, bottom: 7, left: 8 },
+          primaryAxisAlign: 'SPACE_BETWEEN' as const,
+          counterAxisAlign: 'CENTER' as const,
+        }
+      : {}),
+    children,
+  }
+}
+
 describe('Figma document renderer complete tree', () => {
+  it('resizes frame, text, and image nodes without assigning read-only dimensions', async () => {
+    const createdFrames: ReadOnlyGeometryNode[] = []
+    const createdTexts: ReadOnlyGeometryNode[] = []
+    const createdRectangles: ReadOnlyGeometryNode[] = []
+    const figma = {
+      createFrame: vi.fn(() => {
+        const node = createReadOnlyGeometryNode('FRAME')
+        createdFrames.push(node)
+        return node
+      }),
+      createText: vi.fn(() => {
+        const node = createReadOnlyGeometryNode('TEXT')
+        createdTexts.push(node)
+        return node
+      }),
+      createRectangle: vi.fn(() => {
+        const node = createReadOnlyGeometryNode('RECTANGLE')
+        createdRectangles.push(node)
+        return node
+      }),
+      loadFontAsync: vi.fn().mockResolvedValue(undefined),
+    }
+    const renderer = createDocumentRenderer(figma)
+    const temporaryRoot = createNode('FRAME')
+
+    await expect(renderer.renderCompleteTree(completePlan(), temporaryRoot)).resolves.toBeUndefined()
+
+    expect(createdFrames[0].resize).toHaveBeenCalledWith(640, 480)
+    expect(createdTexts[0].resize).toHaveBeenCalledWith(200, 40)
+    expect(createdRectangles[0].resize).toHaveBeenCalledWith(300, 180)
+    expect(createdFrames[0]).toMatchObject({ width: 640, height: 480 })
+    expect(createdTexts[0]).toMatchObject({ width: 200, height: 40 })
+    expect(createdRectangles[0]).toMatchObject({ width: 300, height: 180 })
+  })
+
   it('creates the hierarchy and applies geometry, properties, text, and image resources', async () => {
     const createdFrames: FakeNode[] = []
     const createdTexts: FakeNode[] = []
@@ -174,8 +334,6 @@ describe('Figma document renderer complete tree', () => {
       paddingLeft: 8,
       primaryAxisAlignItems: 'SPACE_BETWEEN',
       counterAxisAlignItems: 'CENTER',
-      layoutGrow: 1,
-      layoutPositioning: 'ABSOLUTE',
     })
     expect(figma.loadFontAsync).toHaveBeenCalledWith({ family: 'Inter', style: 'Bold' })
     expect(headline).toMatchObject({
@@ -200,6 +358,87 @@ describe('Figma document renderer complete tree', () => {
       opacity: 0.5,
       fills: [{ type: 'IMAGE', imageHash: 'hero-hash', scaleMode: 'FILL' }],
     })
+  })
+
+  it('writes Auto Layout container properties only to sealed frames', async () => {
+    const createdFrames: FakeNode[] = []
+    const createdTexts: FakeNode[] = []
+    const createdRectangles: FakeNode[] = []
+    const figma = {
+      createFrame: vi.fn(() => {
+        const node = createSealedAutoLayoutNode('FRAME', { container: true, child: true })
+        createdFrames.push(node)
+        return node
+      }),
+      createText: vi.fn(() => {
+        const node = createSealedAutoLayoutNode('TEXT', { container: false, child: true })
+        createdTexts.push(node)
+        return node
+      }),
+      createRectangle: vi.fn(() => {
+        const node = createSealedAutoLayoutNode('RECTANGLE', { container: false, child: true })
+        createdRectangles.push(node)
+        return node
+      }),
+      loadFontAsync: vi.fn().mockResolvedValue(undefined),
+    }
+    const renderer = createDocumentRenderer(figma)
+    const temporaryRoot = createNode('FRAME')
+    const plan = autoLayoutRegressionPlan(true, true)
+
+    await expect(renderer.renderCompleteTree(plan, temporaryRoot)).resolves.toBeUndefined()
+
+    expect(createdFrames[0]).toMatchObject({
+      layoutMode: 'VERTICAL',
+      itemSpacing: 16,
+      paddingTop: 5,
+      paddingRight: 6,
+      paddingBottom: 7,
+      paddingLeft: 8,
+      primaryAxisAlignItems: 'SPACE_BETWEEN',
+      counterAxisAlignItems: 'CENTER',
+    })
+    expect(createdTexts[0]).toMatchObject({ layoutGrow: 1, layoutPositioning: 'ABSOLUTE' })
+    expect(createdRectangles[0]).toMatchObject({ layoutGrow: 1, layoutPositioning: 'ABSOLUTE' })
+    expect('layoutMode' in createdTexts[0]).toBe(false)
+    expect('layoutMode' in createdRectangles[0]).toBe(false)
+  })
+
+  it('does not write Auto Layout child properties below a sealed non-Auto Layout parent', async () => {
+    const createdFrames: FakeNode[] = []
+    const createdTexts: FakeNode[] = []
+    const createdRectangles: FakeNode[] = []
+    const figma = {
+      createFrame: vi.fn(() => {
+        const node = createSealedAutoLayoutNode('FRAME', { container: true, child: false })
+        createdFrames.push(node)
+        return node
+      }),
+      createText: vi.fn(() => {
+        const node = createSealedAutoLayoutNode('TEXT', { container: false, child: false })
+        createdTexts.push(node)
+        return node
+      }),
+      createRectangle: vi.fn(() => {
+        const node = createSealedAutoLayoutNode('RECTANGLE', { container: false, child: false })
+        createdRectangles.push(node)
+        return node
+      }),
+      loadFontAsync: vi.fn().mockResolvedValue(undefined),
+    }
+    const renderer = createDocumentRenderer(figma)
+    const temporaryRoot = createNode('FRAME')
+    const plan = autoLayoutRegressionPlan(false, false)
+
+    await expect(renderer.renderCompleteTree(plan, temporaryRoot)).resolves.toBeUndefined()
+
+    expect(createdFrames).toHaveLength(1)
+    expect(createdTexts).toHaveLength(1)
+    expect(createdRectangles).toHaveLength(1)
+    expect('layoutGrow' in createdTexts[0]).toBe(false)
+    expect('layoutPositioning' in createdTexts[0]).toBe(false)
+    expect('layoutGrow' in createdRectangles[0]).toBe(false)
+    expect('layoutPositioning' in createdRectangles[0]).toBe(false)
   })
 
   it('moves and reveals the temporary root only after its complete tree has rendered', async () => {
