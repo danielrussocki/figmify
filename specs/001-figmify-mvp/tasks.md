@@ -290,6 +290,6 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
   **RF:** RF-01, RF-03, RF-05, RF-06.
   **Hecho cuando:** los tipos, la validación, las fixtures y la documentación del MVP identifican `schemaVersion: "1.1"` como el contrato admitido por `GET /v1/figma`, sin cambiar la ruta ni aceptar respuestas incompatibles.
 
-- [ ] **73. Verificar la compatibilidad con Figma 1.1 y el árbol de contenedores con fondo de imagen.**
+- [x] **73. Verificar la compatibilidad con Figma 1.1 y el árbol de contenedores con fondo de imagen.**
   **RF:** RF-03, RF-05.
   **Hecho cuando:** una importación de `https://simplesite.ayra.ch/` en una página vacía crea un único árbol `Frame > html > body > div`, conserva la pintura de imagen de fondo en `body`, no deja nodos hermanos en la página y `npm run build`, `npm run lint` y todas las suites configuradas finalizan correctamente.
