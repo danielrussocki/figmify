@@ -158,6 +158,8 @@ function applyGeometryAndAppearance(plan: RenderPlanNode, node: RenderableNode):
   if (plan.placeholder !== undefined) {
     node.name = plan.placeholder.label
   }
+
+  node.name = plan.tag
 }
 
 function applyAutoLayout(plan: RenderPlanNode, node: RenderableNode, parentUsesAutoLayout: boolean): void {

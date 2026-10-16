@@ -48,6 +48,7 @@ describe('render plan hierarchy and geometry', () => {
   it('maps FRAME, TEXT, and IMAGE nodes recursively with relative geometry', () => {
     expect(buildRenderPlan(root)).toEqual({
       id: 'root',
+      tag: 'body',
       type: 'FRAME',
       geometry: { x: 0, y: 0, width: 1440, height: 900 },
       isVisible: true,
@@ -55,6 +56,7 @@ describe('render plan hierarchy and geometry', () => {
       children: [
         {
           id: 'hero',
+          tag: 'section',
           type: 'FRAME',
           geometry: { x: 80, y: 96, width: 640, height: 360 },
           isVisible: true,
@@ -62,6 +64,7 @@ describe('render plan hierarchy and geometry', () => {
           children: [
             {
               id: 'headline',
+              tag: 'h1',
               type: 'TEXT',
               geometry: { x: 32, y: 32, width: 400, height: 72 },
               isVisible: true,
@@ -70,6 +73,7 @@ describe('render plan hierarchy and geometry', () => {
             },
             {
               id: 'hero-image',
+              tag: 'img',
               type: 'IMAGE',
               geometry: { x: 32, y: 136, width: 576, height: 192 },
               isVisible: false,
@@ -438,6 +442,64 @@ describe('render plan inline SVG', () => {
       opacity: 0.4,
       children: [
         expect.objectContaining({ id: 'svg-path' }),
+      ],
+    })
+  })
+})
+
+describe('render plan HTML tags', () => {
+  it('preserves the HTML tag of every node without changing its hierarchy or visual properties', () => {
+    const document: FigmaNode = {
+      id: 'html-root',
+      tag: 'html',
+      type: 'FRAME',
+      rect: { x: 0, y: 0, width: 1280, height: 720, top: 0, left: 0 },
+      isVisible: true,
+      opacity: 0.9,
+      children: [
+        {
+          id: 'body',
+          tag: 'body',
+          type: 'FRAME',
+          rect: { x: 16, y: 24, width: 960, height: 640, top: 24, left: 16 },
+          isVisible: true,
+          children: [
+            {
+              id: 'heading',
+              tag: 'h1',
+              type: 'TEXT',
+              rect: { x: 32, y: 48, width: 400, height: 64, top: 48, left: 32 },
+              isVisible: true,
+              children: [],
+            },
+            {
+              id: 'hero',
+              tag: 'img',
+              type: 'IMAGE',
+              rect: { x: 32, y: 136, width: 640, height: 360, top: 136, left: 32 },
+              isVisible: false,
+              opacity: 0.5,
+              children: [],
+            },
+          ],
+        },
+      ],
+    }
+
+    expect(buildRenderPlan(document)).toMatchObject({
+      tag: 'html',
+      geometry: { x: 0, y: 0, width: 1280, height: 720 },
+      isVisible: true,
+      opacity: 0.9,
+      children: [
+        {
+          tag: 'body',
+          geometry: { x: 16, y: 24, width: 960, height: 640 },
+          children: [
+            { tag: 'h1', type: 'TEXT' },
+            { tag: 'img', type: 'IMAGE', isVisible: false, opacity: 0.5 },
+          ],
+        },
       ],
     })
   })

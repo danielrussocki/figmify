@@ -48,7 +48,7 @@ const rootNode: FigmaNode = {
 }
 
 const document: FigmaDocument = {
-  schemaVersion: '1.0',
+  schemaVersion: '1.1',
   source: {
     url: 'https://example.com/',
     viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },
@@ -65,7 +65,7 @@ const apiError: ApiError = {
 
 describe('API v1 contracts', () => {
   it('types a complete successful API v1 document', () => {
-    expectTypeOf(document.schemaVersion).toEqualTypeOf<'1.0'>()
+    expectTypeOf(document.schemaVersion).toEqualTypeOf<'1.1'>()
     expectTypeOf(document.document.children).toEqualTypeOf<FigmaNode[]>()
     expectTypeOf(document.document.fills).toEqualTypeOf<(FigmaSolidPaint | FigmaImagePaint)[] | undefined>()
   })

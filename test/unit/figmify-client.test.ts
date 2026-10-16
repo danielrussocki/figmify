@@ -3,7 +3,7 @@ import type { FigmaDocument } from '../../src/contracts/api-v1'
 import { requestFigmaDocument } from '../../src/infrastructure/api/figmify-client'
 
 const document: FigmaDocument = {
-  schemaVersion: '1.0',
+  schemaVersion: '1.1',
   source: {
     url: 'https://example.com/',
     viewport: {

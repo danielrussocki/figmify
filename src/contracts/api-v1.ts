@@ -1,4 +1,4 @@
-export type FigmaSchemaVersion = '1.0'
+export type FigmaSchemaVersion = '1.1'
 
 export interface FigmaRect {
   x: number
@@ -363,7 +363,7 @@ export function hasValidApiV1Header(value: unknown): boolean {
   }
 
   return (
-    value.schemaVersion === '1.0' &&
+    value.schemaVersion === '1.1' &&
     isRecord(value.source) &&
     isRecord(value.document)
   )

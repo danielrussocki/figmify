@@ -16,6 +16,7 @@ interface GeometryAwareDocumentRenderer {
 
 interface FakeNode {
   readonly kind: 'FRAME' | 'TEXT' | 'RECTANGLE'
+  name?: string
   visible: boolean
   x: number
   y: number
@@ -61,6 +62,10 @@ interface FakeNode {
 
 type InlineSvgRenderPlanNode = RenderPlanNode & {
   readonly svg: string
+}
+
+type TaggedRenderPlanNode = RenderPlanNode & {
+  readonly tag: string
 }
 
 interface ReadOnlyGeometryNode extends FakeNode {
@@ -112,7 +117,7 @@ function createSealedAutoLayoutNode(
   kind: FakeNode['kind'],
   capabilities: { readonly container: boolean; readonly child: boolean },
 ): FakeNode {
-  const node: FakeNode = { ...createNode(kind), width: 0, height: 0, opacity: 1 }
+  const node: FakeNode = { ...createNode(kind), name: '', width: 0, height: 0, opacity: 1 }
 
   if (capabilities.container) {
     Object.assign(node, {
@@ -531,5 +536,80 @@ describe('Figma document renderer complete tree', () => {
     expect(temporaryRoot.children).toEqual([svgNode])
     expect(svgNode).toMatchObject({ x: 48, y: 72, width: 24, height: 24, visible: false, opacity: 0.4 })
     expect(figma.createFrame).not.toHaveBeenCalled()
+  })
+
+  it('assigns HTML tags as names to frame, text, image, and inline SVG nodes without changing their tree or appearance', async () => {
+    const svgNode = createNode('FRAME')
+    const figma = {
+      createFrame: vi.fn(() => createNode('FRAME')),
+      createText: vi.fn(() => createNode('TEXT')),
+      createRectangle: vi.fn(() => createNode('RECTANGLE')),
+      createNodeFromSvg: vi.fn(() => svgNode),
+      loadFontAsync: vi.fn().mockResolvedValue(undefined),
+    }
+    const renderer = createDocumentRenderer(figma)
+    const temporaryRoot = createNode('FRAME')
+    const inlineSvg = '<svg viewBox="0 0 24 24"><path d="M0 0h24v24H0z" /></svg>'
+    const plan = {
+      id: 'html-root',
+      tag: 'html',
+      type: 'FRAME',
+      geometry: { x: 0, y: 0, width: 1280, height: 720 },
+      isVisible: true,
+      opacity: 0.9,
+      children: [
+        {
+          id: 'body',
+          tag: 'body',
+          type: 'FRAME',
+          geometry: { x: 16, y: 24, width: 960, height: 640 },
+          isVisible: true,
+          opacity: 1,
+          children: [
+            {
+              id: 'heading',
+              tag: 'h1',
+              type: 'TEXT',
+              geometry: { x: 32, y: 48, width: 400, height: 64 },
+              isVisible: true,
+              opacity: 1,
+              children: [],
+            },
+            {
+              id: 'hero',
+              tag: 'img',
+              type: 'IMAGE',
+              geometry: { x: 32, y: 136, width: 640, height: 360 },
+              isVisible: false,
+              opacity: 0.5,
+              children: [],
+            },
+            {
+              id: 'icon',
+              tag: 'svg',
+              type: 'FRAME',
+              svg: inlineSvg,
+              geometry: { x: 704, y: 136, width: 24, height: 24 },
+              isVisible: true,
+              opacity: 0.4,
+              children: [],
+            },
+          ],
+        },
+      ],
+    } as TaggedRenderPlanNode
+
+    await renderer.renderCompleteTree(plan, temporaryRoot)
+
+    const [html] = temporaryRoot.children
+    const [body] = html.children
+    const [heading, hero, icon] = body.children
+    expect(html).toMatchObject({ name: 'html', x: 0, y: 0, width: 1280, height: 720, visible: true, opacity: 0.9 })
+    expect(body).toMatchObject({ name: 'body', x: 16, y: 24, width: 960, height: 640 })
+    expect(heading).toMatchObject({ name: 'h1', kind: 'TEXT' })
+    expect(hero).toMatchObject({ name: 'img', kind: 'RECTANGLE', visible: false, opacity: 0.5 })
+    expect(icon).toBe(svgNode)
+    expect(icon).toMatchObject({ name: 'svg', x: 704, y: 136, width: 24, height: 24, visible: true, opacity: 0.4 })
+    expect(figma.createNodeFromSvg).toHaveBeenCalledWith(inlineSvg)
   })
 })

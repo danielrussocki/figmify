@@ -100,6 +100,7 @@ export interface RenderPlanText {
 
 export interface RenderPlanNode extends RenderPlanAutoLayout {
   readonly id: string
+  readonly tag: string
   readonly type: FigmaNodeType
   readonly svg?: string
   readonly geometry: RenderPlanGeometry
@@ -241,6 +242,7 @@ function buildRenderPlanNode(
 
   return {
     id: node.id,
+    tag: node.tag,
     type: node.type,
     ...(node.svg === undefined ? {} : { svg: node.svg }),
     geometry: geometryFrom(node.relativeRect ?? node.rect),

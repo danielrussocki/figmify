@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { hasValidApiV1Document } from '../../src/contracts/api-v1'
 
 const validDocument = {
-  schemaVersion: '1.0',
+  schemaVersion: '1.1',
   source: {
     url: 'https://example.com/',
     viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },

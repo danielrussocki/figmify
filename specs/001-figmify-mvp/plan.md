@@ -54,7 +54,7 @@ test/
 
 ## Modelo de datos JSON
 
-La fuente de verdad es `FigmaDocument` de API v1, con `schemaVersion: "1.0"`. Antes de modificar el lienzo se validan recursivamente el documento y todas las propiedades definidas por el contrato canónico v1. La transformación cubre todos los nodos y propiedades que API v1 declara compatibles con Figma, incluidos geometría, visibilidad, Auto Layout, estilos de texto, pinturas, bordes, efectos, recursos y catálogos reutilizables. **RF-03, RF-05.**
+La fuente de verdad es `FigmaDocument` de API v1, con `schemaVersion: "1.1"`. Antes de modificar el lienzo se validan recursivamente el documento y todas las propiedades definidas por el contrato canónico v1. La transformación cubre todos los nodos y propiedades que API v1 declara compatibles con Figma, incluidos geometría, visibilidad, Auto Layout, estilos de texto, pinturas, bordes, efectos, recursos y catálogos reutilizables. **RF-03, RF-05.**
 
 | Entidad | Campos relevantes |
 | --- | --- |
@@ -69,7 +69,7 @@ Ejemplo reducido de respuesta de éxito:
 
 ```json
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
   "source": {
     "url": "https://example.com/",
     "viewport": {
@@ -157,7 +157,7 @@ Ejemplo reducido de respuesta de éxito:
 | Parámetros | `url` contiene el valor original codificado solo para transporte; `includeHidden=false` |
 | Viewport | Se usan los valores predeterminados de API v1; el MVP no expone controles de viewport. |
 | Autenticación | No se envían credenciales ni cabeceras de autenticación. |
-| Éxito | `FigmaDocument` con `schemaVersion: "1.0"`. |
+| Éxito | `FigmaDocument` con `schemaVersion: "1.1"`. |
 | Error de API | Cuerpo `{ "code": string, "message": string }`; el mensaje se presenta en inglés. |
 | Error previo a respuesta | `Unable to reach Figmify API. Please try again.` |
 | Respuesta no conforme | `The API response is not compatible with API v1.` |

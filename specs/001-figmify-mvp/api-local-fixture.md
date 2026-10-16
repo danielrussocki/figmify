@@ -10,7 +10,7 @@
 
 ### Success
 
-The local API returned HTTP `200` with `schemaVersion: "1.0"`,
+The local API returned HTTP `200` with `schemaVersion: "1.1"`,
 `source.url: "https://example.com/"`, and a root document whose type is
 `"FRAME"`.
 

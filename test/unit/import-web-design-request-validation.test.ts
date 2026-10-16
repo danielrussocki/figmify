@@ -4,7 +4,7 @@ import type { FigmaDocument } from '../../src/contracts/api-v1'
 import type { ApplicationMessage } from '../../src/contracts/messages'
 
 const validDocument: FigmaDocument = {
-  schemaVersion: '1.0',
+  schemaVersion: '1.1',
   source: {
     url: 'https://example.com/',
     viewport: { width: 1440, height: 900, deviceScaleFactor: 1 },

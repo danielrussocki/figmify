@@ -54,7 +54,7 @@ const availableFont: AvailableFont = { family: 'Inter', style: 'Regular' }
 const missingFont: AvailableFont = { family: 'Missing Sans', style: 'Bold' }
 
 const validDocument: FigmaDocument = {
-  schemaVersion: '1.0',
+  schemaVersion: '1.1',
   source: {
     url: 'https://example.com/',
     viewport: { width: 1440, height: 900, deviceScaleFactor: 1 },
