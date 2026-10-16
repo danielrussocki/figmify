@@ -1,4 +1,4 @@
-export const localApiBaseUrl = 'http://127.0.0.1:3000'
+export const localApiBaseUrl = 'http://localhost:3000'
 
 const localApiProbeUrl =
   `${localApiBaseUrl}/v1/figma?url=not-a-url&includeHidden=false`

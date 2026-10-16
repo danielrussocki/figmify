@@ -4,7 +4,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
 
 - [x] **01. Verificar el entorno local de API v1 y fijar una URL de fixture pública controlada.**  
   **RF:** RF-01, RF-03, RF-05, RF-06.  
-  **Hecho cuando:** `http://127.0.0.1:3000/v1/figma` responde para la fixture elegida y se registra el resultado esperado de éxito y de error.
+  **Hecho cuando:** `http://localhost:3000/v1/figma` responde para la fixture elegida y se registra el resultado esperado de éxito y de error.
 
 - [x] **02. Añadir `esbuild` como dependencia de desarrollo y definir la compilación de las entradas del plugin.**
   **RF:** RF-01 a RF-06.  
@@ -16,7 +16,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
 
 - [x] **04. Configurar el acceso de red del manifiesto para el MVP.**  
   **RF:** RF-03, RF-06.  
-  **Hecho cuando:** el manifiesto contiene `allowedDomains: ["*"]`, la justificación aprobada en inglés y `http://127.0.0.1:3000` como dominio de desarrollo.
+  **Hecho cuando:** el manifiesto contiene `allowedDomains: ["*"]`, la justificación aprobada en inglés y `http://localhost:3000` como dominio de desarrollo.
 
 - [x] **05. Crear la estructura de módulos y las entradas de composición sin implementar comportamiento.**
   **RF:** RF-01 a RF-06.  
@@ -52,7 +52,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
 
 - [x] **13. Preparar el harness de integración contra la API local real.**  
   **RF:** RF-01, RF-05, RF-06.  
-  **Hecho cuando:** los tests de integración pueden iniciar contra `127.0.0.1:3000` y fallan claramente si la API local no está disponible.
+  **Hecho cuando:** los tests de integración pueden iniciar contra `localhost:3000` y fallan claramente si la API local no está disponible.
 
 - [x] **14. Escribir la prueba de integración HTTP de solicitud correcta.**  
   **RF:** RF-01, RF-06.  
@@ -217,3 +217,7 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
 - [x] **54. Verificar la regresión de cancelación en runtimes con y sin `AbortController`.**  
   **RF:** RF-02, RF-05.  
   **Hecho cuando:** las pruebas cubren ambos runtimes, `npm run build`, `npm run lint` y todas las suites configuradas finalizan correctamente, y una importación cancelada en Figma no muestra el error `AbortController is not defined` ni crea elementos tras una respuesta tardía.
+
+- [x] **55. Unificar y verificar el origen local de la API en el cliente y el manifiesto.**
+  **RF:** RF-01, RF-05, RF-06.
+  **Hecho cuando:** `figmifyApiBaseUrl` y `devAllowedDomains` declaran el mismo origen local, una prueba de regresión verifica esa coherencia y una solicitud desde el plugin recargado en Figma alcanza la API local sin mostrar `Unable to reach Figmify API. Please try again.`.

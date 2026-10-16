@@ -2,7 +2,7 @@
 
 ## Alcance y trazabilidad
 
-Este plan implementa exclusivamente la [especificación del MVP](spec.md) y el contrato de [API Figmify v1](https://github.com/danielrussocki/api.figmify). La base de API v1 para el MVP es `http://127.0.0.1:3000`. No se añadirán autenticación, persistencia entre aperturas, reconocimiento de importaciones anteriores ni versiones posteriores de la API.
+Este plan implementa exclusivamente la [especificación del MVP](spec.md) y el contrato de [API Figmify v1](https://github.com/danielrussocki/api.figmify). La base de API v1 para el MVP es `http://localhost:3000`. No se añadirán autenticación, persistencia entre aperturas, reconocimiento de importaciones anteriores ni versiones posteriores de la API.
 
 | Área | RF cubiertos |
 | --- | --- |
@@ -152,7 +152,7 @@ Ejemplo reducido de respuesta de éxito:
 
 | Aspecto | Contrato |
 | --- | --- |
-| Base | `http://127.0.0.1:3000` |
+| Base | `http://localhost:3000` |
 | Operación | `GET /v1/figma` |
 | Parámetros | `url` contiene el valor original codificado solo para transporte; `includeHidden=false` |
 | Viewport | Se usan los valores predeterminados de API v1; el MVP no expone controles de viewport. |
@@ -169,7 +169,7 @@ La capa HTTP conserva semánticamente la URL introducida: la codificación del p
 
 ### Acceso de red
 
-El manifiesto declarará `allowedDomains: ["*"]` y el campo `reasoning` en inglés con el texto `Figmify imports web designs and their public image resources from domains returned by API v1.`. El entorno de desarrollo incluirá `http://127.0.0.1:3000` en `devAllowedDomains`. La amplitud del permiso está aprobada para que Figma resuelva directamente las imágenes de las URLs devueltas por API v1. **RF-03, RF-06.**
+El manifiesto declarará `allowedDomains: ["*"]` y el campo `reasoning` en inglés con el texto `Figmify imports web designs and their public image resources from domains returned by API v1.`. El entorno de desarrollo incluirá `http://localhost:3000` en `devAllowedDomains`. Figma rechaza `http://127.0.0.1:3000` en este campo porque no es una URL de desarrollo válida; por ello el cliente y el manifiesto usarán siempre el origen `localhost`. La amplitud del permiso está aprobada para que Figma resuelva directamente las imágenes de las URLs devueltas por API v1. **RF-03, RF-06.**
 
 ### Protocolo entre interfaz y aplicación
 
@@ -299,7 +299,7 @@ END FUNCTION
 | Unitario: fuentes y recursos | Agrupación por familia/estilo, selección única, cancelación con fuente predeterminada, marcadores no tipográficos y avisos de éxito. | RF-03 |
 | Unitario: ubicación | `(0, 0)` sin contenido, confirmación de añadir/cancelar, límites de nodos visibles, separación de 100 px, alineación superior y conservación de nodos existentes. | RF-04, RF-05 |
 | Unitario: plan de renderizado | Mapeo recursivo de todos los nodos y propiedades API v1: geometría, Auto Layout, texto, estilos, pinturas, bordes, efectos, recursos y visibilidad. | RF-03 |
-| Integración: API local real | API v1 en `127.0.0.1:3000` con páginas y fixtures controlados; verifica solicitud HTTP real, errores, contrato y falta de autenticación. | RF-01, RF-05, RF-06 |
+| Integración: API local real | API v1 en `localhost:3000` con páginas y fixtures controlados; verifica solicitud HTTP real, errores, contrato y falta de autenticación. | RF-01, RF-05, RF-06 |
 | Integración: aplicación | API local real y Figma simulado: éxito, respuesta inválida, recurso inaccesible, selector de fuente, cancelación, cambio de página, página eliminada y cambios de contenido durante la espera. | RF-01 a RF-06 |
 | Integración: atomicidad | Fallo al cargar recurso, fuente o nodo; se elimina la raíz temporal y el contenido existente permanece intacto. | RF-03, RF-04, RF-05 |
 | Verificación de manifiesto | Se comprueba el permiso global, su justificación en inglés y el dominio local de desarrollo antes de publicar. | RF-03, RF-06 |

@@ -4,7 +4,7 @@
 
 - Fixture URL: `https://example.com/`
 - Control and stability: the IANA-managed example domain is reserved for documentation and is publicly available.
-- Request: `GET http://127.0.0.1:3000/v1/figma?url=https%3A%2F%2Fexample.com%2F&includeHidden=false`
+- Request: `GET http://localhost:3000/v1/figma?url=https%3A%2F%2Fexample.com%2F&includeHidden=false`
 
 ## Verified expected results
 
@@ -18,7 +18,7 @@ The local API returned HTTP `200` with `schemaVersion: "1.0"`,
 
 The local API returned HTTP `400` for:
 
-`GET http://127.0.0.1:3000/v1/figma?url=not-a-url&includeHidden=false`
+`GET http://localhost:3000/v1/figma?url=not-a-url&includeHidden=false`
 
 The response body was:
 

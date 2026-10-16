@@ -36,7 +36,7 @@ describe('Figmify API v1 client', () => {
 
     expect(fetchImplementation).toHaveBeenCalledOnce()
     expect(fetchImplementation).toHaveBeenCalledWith(
-      'http://127.0.0.1:3000/v1/figma?url=not+a+URL%3Fwith%3Dunescaped+values&includeHidden=false',
+      'http://localhost:3000/v1/figma?url=not+a+URL%3Fwith%3Dunescaped+values&includeHidden=false',
       {
         method: 'GET',
         signal: controller.signal,
@@ -52,7 +52,7 @@ describe('Figmify API v1 client', () => {
     await expect(requestFigmaDocument('https://example.com/', undefined, fetchImplementation)).resolves.toEqual(document)
 
     expect(fetchImplementation).toHaveBeenCalledWith(
-      'http://127.0.0.1:3000/v1/figma?url=https%3A%2F%2Fexample.com%2F&includeHidden=false',
+      'http://localhost:3000/v1/figma?url=https%3A%2F%2Fexample.com%2F&includeHidden=false',
       { method: 'GET' },
     )
     expect(Object.hasOwn(fetchImplementation.mock.calls[0]?.[1] ?? {}, 'signal')).toBe(false)

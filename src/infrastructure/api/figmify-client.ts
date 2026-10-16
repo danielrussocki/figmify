@@ -1,6 +1,6 @@
 import { hasValidApiV1Document, type ApiError, type FigmaDocument } from '../../contracts/api-v1'
 
-export const figmifyApiBaseUrl = 'http://127.0.0.1:3000'
+export const figmifyApiBaseUrl = 'http://localhost:3000'
 
 export type FigmifyApiV1Response = FigmaDocument | ApiError
 

@@ -16,7 +16,7 @@ describe('API v1 correct HTTP request', () => {
 
     expect(request.method).toBe('GET')
     expect(request.url).toBe(
-      'http://127.0.0.1:3000/v1/figma?url=https%3A%2F%2Fexample.com%2F&includeHidden=false',
+      'http://localhost:3000/v1/figma?url=https%3A%2F%2Fexample.com%2F&includeHidden=false',
     )
     expect(request.headers.has('authorization')).toBe(false)
 
