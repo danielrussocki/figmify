@@ -64,6 +64,7 @@ export interface DocumentRendererFigma {
   createFrame(): RenderableNode
   createText(): RenderableNode
   createRectangle(): RenderableNode
+  createNodeFromSvg(svg: string): RenderableNode
   loadFontAsync(font: { readonly family: string; readonly style: string }): Promise<void>
 }
 
@@ -229,11 +230,13 @@ export function createDocumentRenderer(figma: DocumentRendererFigma): DocumentRe
     parent: TemporaryRootNode,
     parentUsesAutoLayout: boolean,
   ): Promise<void> {
-    const node = plan.type === 'FRAME'
-      ? figma.createFrame()
-      : plan.type === 'TEXT'
-        ? figma.createText()
-        : figma.createRectangle()
+    const node = plan.svg !== undefined
+      ? figma.createNodeFromSvg(plan.svg)
+      : plan.type === 'FRAME'
+        ? figma.createFrame()
+        : plan.type === 'TEXT'
+          ? figma.createText()
+          : figma.createRectangle()
 
     parent.appendChild?.(node)
 
@@ -241,11 +244,13 @@ export function createDocumentRenderer(figma: DocumentRendererFigma): DocumentRe
     applyAutoLayout(plan, node, parentUsesAutoLayout)
     await applyText(plan, node, figma)
 
-    const nodeUsesAutoLayout = plan.type === 'FRAME'
+    const nodeUsesAutoLayout = plan.svg === undefined && plan.type === 'FRAME'
       && plan.layoutMode !== undefined
       && plan.layoutMode !== 'NONE'
-    for (const child of plan.children) {
-      await renderNode(child, node, nodeUsesAutoLayout)
+    if (plan.svg === undefined) {
+      for (const child of plan.children) {
+        await renderNode(child, node, nodeUsesAutoLayout)
+      }
     }
   }
 

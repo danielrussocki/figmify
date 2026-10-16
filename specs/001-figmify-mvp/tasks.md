@@ -257,3 +257,15 @@ Cada tarea está acotada a un máximo de 20–30 minutos y debe completarse en o
 - [x] **64. Verificar la corrección del tamaño de la raíz temporal en Figma y las suites automatizadas.**
   **RF:** RF-03, RF-05.
   **Hecho cuando:** una importación desde el plugin recargado en Figma muestra una raíz temporal con las dimensiones completas del documento importado, sin un marco raíz de tamaño predeterminado, y `npm run build`, `npm run lint` y todas las suites configuradas finalizan correctamente.
+
+- [ ] **65. Escribir pruebas de regresión para SVG inline en el plan y el renderizador.**
+  **RF:** RF-03, RF-05.
+  **Hecho cuando:** las pruebas verifican que un nodo v1 con `svg` se conserva en el plan, no se envía al resolvedor de recursos externos, se crea mediante `createNodeFromSvg(svg)`, conserva geometría, visibilidad y opacidad, y no vuelve a crear como marcos vacíos sus hijos ya contenidos en el SVG.
+
+- [x] **66. Implementar el renderizado de SVG inline de API v1.**
+  **RF:** RF-03.
+  **Hecho cuando:** el plan de renderizado transporta el campo `svg` validado y el adaptador de Figma usa `figma.createNodeFromSvg` para crear el contenido editable con sus propiedades visuales y geometría, sin intentar descargarlo como imagen o icono externo ni duplicar su árbol interno.
+
+- [x] **67. Verificar la regresión de SVG inline en Figma y las suites automatizadas.**
+  **RF:** RF-03, RF-05.
+  **Hecho cuando:** una importación desde el plugin recargado en Figma que contiene un SVG inline con un `path` muestra el vector en la posición y tamaño esperados, sin marcos vacíos adicionales, y `npm run build`, `npm run lint` y todas las suites configuradas finalizan correctamente.

@@ -59,6 +59,10 @@ interface FakeNode {
   remove(): void
 }
 
+type InlineSvgRenderPlanNode = RenderPlanNode & {
+  readonly svg: string
+}
+
 interface ReadOnlyGeometryNode extends FakeNode {
   resize(width: number, height: number): void
 }
@@ -490,5 +494,42 @@ describe('Figma document renderer complete tree', () => {
 
     expect(temporaryRoot.resize).toHaveBeenCalledWith(1280, 720)
     expect(temporaryRoot).toMatchObject({ x: -10000, y: -10000 })
+  })
+
+  it('creates inline SVG once without rendering its source children as empty frames', async () => {
+    const inlineSvg = '<svg viewBox="0 0 24 24"><path d="M0 0h24v24H0z" /></svg>'
+    const svgNode = createNode('FRAME')
+    const figma = {
+      createFrame: vi.fn(() => createNode('FRAME')),
+      createText: vi.fn(() => createNode('TEXT')),
+      createRectangle: vi.fn(() => createNode('RECTANGLE')),
+      createNodeFromSvg: vi.fn(() => svgNode),
+      loadFontAsync: vi.fn().mockResolvedValue(undefined),
+    }
+    const renderer = createDocumentRenderer(figma)
+    const temporaryRoot = createNode('FRAME')
+    const plan: InlineSvgRenderPlanNode = {
+      id: 'inline-icon',
+      type: 'FRAME',
+      svg: inlineSvg,
+      geometry: { x: 48, y: 72, width: 24, height: 24 },
+      isVisible: false,
+      opacity: 0.4,
+      children: [{
+        id: 'svg-path',
+        type: 'FRAME',
+        geometry: { x: 0, y: 0, width: 24, height: 24 },
+        isVisible: true,
+        opacity: 1,
+        children: [],
+      }],
+    }
+
+    await renderer.renderCompleteTree(plan, temporaryRoot)
+
+    expect(figma.createNodeFromSvg).toHaveBeenCalledWith(inlineSvg)
+    expect(temporaryRoot.children).toEqual([svgNode])
+    expect(svgNode).toMatchObject({ x: 48, y: 72, width: 24, height: 24, visible: false, opacity: 0.4 })
+    expect(figma.createFrame).not.toHaveBeenCalled()
   })
 })

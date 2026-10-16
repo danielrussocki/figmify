@@ -253,7 +253,7 @@ function collectFontUses(node: FigmaDocument['document']): readonly FontUse[] {
 function collectResources(node: FigmaDocument['document']): readonly NonTypographyResource[] {
   const source = node.fills?.find((paint) => paint.type === 'IMAGE')?.src ?? node.image?.src
   return [
-    ...(source === undefined ? [] : [{
+    ...(source === undefined || node.svg !== undefined ? [] : [{
       id: node.id,
       kind: node.svg === undefined ? 'image' as const : 'icon' as const,
       source,

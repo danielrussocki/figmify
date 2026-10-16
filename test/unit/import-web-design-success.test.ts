@@ -109,6 +109,7 @@ function createImportWebDesign(dependencies: ImportWebDesignDependencies): Impor
 function createFixture(options: {
   startPageHasNodes: boolean
   resourceResults: readonly NonTypographyResourceResult[]
+  document?: FigmaDocument
 }): {
   application: ImportWebDesign
   messages: ApplicationMessage[]
@@ -124,7 +125,7 @@ function createFixture(options: {
     confirmTemporaryRoot: vi.fn(),
     removeTemporaryRoot: vi.fn(),
   }
-  const requestFigmaDocument = vi.fn().mockResolvedValue(validDocument)
+  const requestFigmaDocument = vi.fn().mockResolvedValue(options.document ?? validDocument)
   const resourceLoader = { resolve: vi.fn().mockResolvedValue(options.resourceResults) }
   const application = createImportWebDesign({
     postMessage: (message) => messages.push(message),
@@ -194,6 +195,41 @@ describe('import web design successful orchestration', () => {
       expect(fixture.renderer.renderCompleteTree).toHaveBeenCalledOnce()
       expect(fixture.renderer.confirmTemporaryRoot).toHaveBeenCalledWith({ id: 'temporary-root' }, { x: 420, y: 40 })
       expect(fixture.messages).toContainEqual({ type: 'IMPORT_STATUS', requestId: 'request-1', status: 'success' })
+    })
+  })
+
+  it('does not send an inline SVG node to the external resource resolver', async () => {
+    const inlineSvgDocument: FigmaDocument = {
+      ...validDocument,
+      document: {
+        ...validDocument.document,
+        children: [{
+          id: 'inline-icon',
+          tag: 'svg',
+          type: 'FRAME',
+          rect: { x: 48, y: 72, width: 24, height: 24, top: 72, left: 48 },
+          isVisible: true,
+          svg: '<svg viewBox="0 0 24 24"><path d="M0 0h24v24H0z" /></svg>',
+          image: { src: 'https://images.example.com/icon.svg', backgroundSize: 'contain' },
+          children: [],
+        }],
+      },
+    }
+    const fixture = createFixture({
+      startPageHasNodes: false,
+      resourceResults: [],
+      document: inlineSvgDocument,
+    })
+
+    fixture.application.handleMessage({ type: 'IMPORT_REQUEST', requestId: 'request-inline-svg', url: 'https://example.com/' })
+
+    await vi.waitFor(() => {
+      expect(fixture.resourceLoader.resolve).toHaveBeenCalledWith([])
+      expect(fixture.messages).toContainEqual({
+        type: 'IMPORT_STATUS',
+        requestId: 'request-inline-svg',
+        status: 'success',
+      })
     })
   })
 

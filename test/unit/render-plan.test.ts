@@ -406,3 +406,39 @@ describe('render plan image paints and placeholders', () => {
     })
   })
 })
+
+describe('render plan inline SVG', () => {
+  it('preserves inline SVG while retaining its visual properties and source children', () => {
+    const inlineSvg = '<svg viewBox="0 0 24 24"><path d="M0 0h24v24H0z" /></svg>'
+    const icon: FigmaNode = {
+      id: 'inline-icon',
+      tag: 'svg',
+      type: 'FRAME',
+      rect: { x: 48, y: 72, width: 24, height: 24, top: 72, left: 48 },
+      isVisible: false,
+      opacity: 0.4,
+      svg: inlineSvg,
+      children: [
+        {
+          id: 'svg-path',
+          tag: 'path',
+          type: 'FRAME',
+          rect: { x: 48, y: 72, width: 24, height: 24, top: 72, left: 48 },
+          relativeRect: { x: 0, y: 0, width: 24, height: 24, top: 0, left: 0 },
+          isVisible: true,
+          children: [],
+        },
+      ],
+    }
+
+    expect(buildRenderPlan(icon)).toMatchObject({
+      svg: inlineSvg,
+      geometry: { x: 48, y: 72, width: 24, height: 24 },
+      isVisible: false,
+      opacity: 0.4,
+      children: [
+        expect.objectContaining({ id: 'svg-path' }),
+      ],
+    })
+  })
+})
